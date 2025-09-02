@@ -1,4 +1,4 @@
-﻿# Bank Account Example  1 - Clean Architecture with DDD	
+﻿# Bank Account Example 2 - Clean Architecture with DDD
 
 This example demonstrates Domain-Driven Design (DDD) patterns implemented using Clean Architecture principles with an in-memory database and event store.
 
