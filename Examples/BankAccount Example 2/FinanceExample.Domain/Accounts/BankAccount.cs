@@ -124,25 +124,34 @@ namespace FinanceExample.Domain.Accounts
 
             // Check if sufficient funds
             var withdrawalAmount = moneyResult.Value!;
-            if (Balance is null || !CanWithdraw(withdrawalAmount))
+            var canWithdrawResult = CanWithdraw(withdrawalAmount);
+            if (canWithdrawResult.IsFailure)
             {
-                return Error.InvalidInput("Insufficient funds");
+                return canWithdrawResult;
             }
 
             return Apply(new MoneyWithdrawnEvent(Id, withdrawalAmount));
         }
 
-        private bool CanWithdraw(Money amount)
+        private Result CanWithdraw(Money amount)
         {
-            try
+            if (Balance is null)
             {
-                var remaining = Balance.Subtract(amount);
-                return remaining.Amount >= 0;
+                return Error.InvalidInput("Insufficient funds");
             }
-            catch
+
+            var remainingResult = Balance.Subtract(amount);
+            if (remainingResult.IsFailure)
             {
-                return false;
+                return Result.Failure(remainingResult.Errors);
             }
+
+            if (remainingResult.Value!.Amount < 0)
+            {
+                return Error.InvalidInput("Insufficient funds");
+            }
+
+            return Result.Success();
         }
 
         // Event handlers - no validation, just state reconstruction
@@ -167,13 +176,29 @@ namespace FinanceExample.Domain.Accounts
             }
             else
             {
-                Balance = Balance.Add(@event.Amount);
+                // Event handlers should not fail - this is state reconstruction
+                // We assume the events were already validated when originally applied
+                var addResult = Balance.Add(@event.Amount);
+                if (addResult.IsSuccess)
+                {
+                    Balance = addResult.Value!;
+                }
+                // If this fails during event replay, it indicates data corruption
+                // Consider logging this scenario or handling it based on your business rules
             }
         }
 
         private void OnMoneyWithdrawn(MoneyWithdrawnEvent @event)
         {         
-            Balance = Balance.Subtract(@event.Amount);
+            // Event handlers should not fail - this is state reconstruction
+            // We assume the events were already validated when originally applied
+            var subtractResult = Balance.Subtract(@event.Amount);
+            if (subtractResult.IsSuccess)
+            {
+                Balance = subtractResult.Value!;
+            }
+            // If this fails during event replay, it indicates data corruption
+            // Consider logging this scenario or handling it based on your business rules
         }
     }
 }

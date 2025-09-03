@@ -1,5 +1,6 @@
 using FCT.DDD.Primitives.Abstractions.Data;
 using FinanceExample.Application.Abstractions.Messaging;
+using FinanceExample.Application.Abstractions.Services;
 using FinanceExample.Application.Contracts.BankAccounts;
 using FinanceExample.Application.Extensions;
 using FinanceExample.Domain.Accounts;
@@ -17,10 +18,12 @@ namespace FinanceExample.Application.Features.BankAccounts
 
         internal sealed class Handler(
             IRepository<BankAccount, BankAccountId, Guid> repository,
+            ICurrencyValidationService currencyValidationService,
             IEventStore eventStore,
             IUnitOfWork unitOfWork) : IRequestHandler<Command, Result<DepositToBankAccountResponse>>
         {
             private readonly IRepository<BankAccount, BankAccountId, Guid> _repository = repository;
+            private readonly ICurrencyValidationService _currencyValidationService = currencyValidationService;
             private readonly IEventStore _eventStore = eventStore;
             private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
@@ -33,6 +36,13 @@ namespace FinanceExample.Application.Features.BankAccounts
                 {
                     return Result<DepositToBankAccountResponse>.Failure(
                         Error.NotFound("Bank account not found"));
+                }
+
+                // Validate currency against supported currencies
+                var currencyValidationResult = await _currencyValidationService.ValidateCurrencyAsync(request.Currency, cancellationToken);
+                if (currencyValidationResult.IsFailure)
+                {
+                    return Result<DepositToBankAccountResponse>.Failure(currencyValidationResult.Errors);
                 }
 
                 // Get current version for optimistic concurrency

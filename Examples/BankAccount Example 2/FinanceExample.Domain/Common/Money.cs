@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions;
 using ThirteenBytes.DDDPatterns.Primitives.Common;
@@ -17,37 +15,63 @@ namespace FinanceExample.Domain.Common
             Currency = currency;
         }
 
+        // Factory method for basic format validation (existing behavior)
         public static Result<Money> Create(decimal amount, string currency)
         {
             return WithValidation(
-                () => ValidateMoney(amount, currency),
+                () => ValidateMoneyFormat(amount, currency),
                 () => new Money(amount, currency));
         }
 
-        private static List<Error> ValidateMoney(decimal amount, string currency)
+        // New factory method that accepts pre-validated currency
+        public static Result<Money> CreateWithValidatedCurrency(decimal amount, string currency)
         {
             var errors = new List<Error>();
-            
+
             // Amount validation
             if (amount < 0)
             {
                 errors.Add(Error.Validation("Amount cannot be negative"));
             }
-            
-            // Currency validation - ISO 4217 currency codes are 3 alphabetic characters
+
+            // Assume currency is already validated
             if (string.IsNullOrWhiteSpace(currency))
             {
                 errors.Add(Error.Validation("Currency code cannot be empty"));
             }
-            else if (!IsValidCurrencyCode(currency))
+
+            if (errors.Any())
+            {
+                return Result<Money>.Failure(errors);
+            }
+
+            return new Money(amount, currency.ToUpperInvariant());
+        }
+
+        private static List<Error> ValidateMoneyFormat(decimal amount, string currency)
+        {
+            var errors = new List<Error>();
+
+            // Amount validation
+            if (amount < 0)
+            {
+                errors.Add(Error.Validation("Amount cannot be negative"));
+            }
+
+            // Currency format validation - ISO 4217 currency codes are 3 alphabetic characters
+            if (string.IsNullOrWhiteSpace(currency))
+            {
+                errors.Add(Error.Validation("Currency code cannot be empty"));
+            }
+            else if (!IsValidCurrencyCodeFormat(currency))
             {
                 errors.Add(Error.Validation("Currency must be a valid ISO 4217 code (3 alphabetic characters)"));
             }
-            
+
             return errors;
         }
 
-        private static bool IsValidCurrencyCode(string currency)
+        private static bool IsValidCurrencyCodeFormat(string currency)
         {
             // Basic ISO 4217 validation: exactly 3 alphabetic characters
             if (currency.Length != 3)
@@ -56,19 +80,29 @@ namespace FinanceExample.Domain.Common
             }
 
             // Check if all characters are letters
-            return Regex.IsMatch(currency, "^[A-Z]{3}$");
+            return Regex.IsMatch(currency, "^[A-Z]{3}$", RegexOptions.IgnoreCase);
         }
 
-        // Common currency operations
-        public Money Add(Money other)
+        // Currency operations now return Result<Money> instead of throwing exceptions
+        public Result<Money> Add(Money other)
         {
-            EnsureSameCurrency(other);
+            var currencyValidation = ValidateSameCurrency(other);
+            if (currencyValidation.IsFailure)
+            {
+                return Result<Money>.Failure(currencyValidation.Errors);
+            }
+
             return new Money(Amount + other.Amount, Currency);
         }
 
-        public Money Subtract(Money other)
+        public Result<Money> Subtract(Money other)
         {
-            EnsureSameCurrency(other);
+            var currencyValidation = ValidateSameCurrency(other);
+            if (currencyValidation.IsFailure)
+            {
+                return Result<Money>.Failure(currencyValidation.Errors);
+            }
+
             return new Money(Amount - other.Amount, Currency);
         }
 
@@ -77,13 +111,15 @@ namespace FinanceExample.Domain.Common
             return new Money(Amount * factor, Currency);
         }
 
-        private void EnsureSameCurrency(Money other)
+        private Result ValidateSameCurrency(Money other)
         {
             if (Currency != other.Currency)
             {
-                throw new InvalidOperationException(
+                return Error.InvalidInput(
                     $"Cannot perform operations on money with different currencies: {Currency} and {other.Currency}");
             }
+
+            return Result.Success();
         }
 
         public override string ToString()

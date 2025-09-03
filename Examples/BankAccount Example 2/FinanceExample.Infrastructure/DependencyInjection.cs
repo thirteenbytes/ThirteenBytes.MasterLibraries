@@ -1,9 +1,11 @@
 using FCT.DDD.Primitives.Abstractions.Data;
 using FinanceExample.Application.Abstractions.Messaging;
+using FinanceExample.Application.Abstractions.Services;
 using FinanceExample.Infrastructure.Behaviors;
 using FinanceExample.Infrastructure.Clock;
 using FinanceExample.Infrastructure.Core;
 using FinanceExample.Infrastructure.InMemory;
+using FinanceExample.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Clock;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
@@ -32,6 +34,9 @@ namespace FinanceExample.Infrastructure
 
             // Event store services (kept separate)
             services.AddSingleton<IEventStore, InMemoryEventStore>();
+
+            // Domain services
+            services.AddScoped<ICurrencyValidationService, CurrencyValidationService>();
 
             // Clock services
             services.AddSingleton<IDateTimeProvider, SystemClockDateTimeProvider>();
