@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Examples/BankAccount Example 2/FinanceExample.WebApi/finance-banking-dev.db
+/Examples/BankAccount Example 2/FinanceExample.WebApi/finance-banking-dev.db-shm
+/Examples/BankAccount Example 2/FinanceExample.WebApi/finance-banking-dev.db-wal
