@@ -6,6 +6,9 @@ using FinanceExample.Infrastructure.Clock;
 using FinanceExample.Infrastructure.Core;
 using FinanceExample.Infrastructure.InMemory;
 using FinanceExample.Infrastructure.Services;
+using FinanceExample.Infrastructure.SqliteData;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Clock;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
@@ -14,7 +17,7 @@ namespace FinanceExample.Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             // Mediator services
             services.AddScoped<IMediator, Mediator>();
@@ -27,12 +30,18 @@ namespace FinanceExample.Infrastructure
             var applicationAssembly = typeof(IMediator).Assembly;
             services.AddMediator(applicationAssembly);
 
-            // Data persistence services
-            services.AddScoped<InMemoryDatabase>();
-            services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<InMemoryDatabase>());
-            services.AddScoped(typeof(IRepository<,,>), typeof(InMemoryRepository<,,>));
+            // SQLite Database services
+            var connectionString = configuration.GetConnectionString("DefaultConnection") 
+                ?? "Data Source=finance-banking.db";
+            
+            services.AddDbContext<FinanceDbContext>(options =>
+                options.UseSqlite(connectionString));
 
-            // Event store services (kept separate)
+            // Register FinanceDbContext as IUnitOfWork
+            services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<FinanceDbContext>());
+            services.AddScoped(typeof(IRepository<,,>), typeof(SqliteRepository<,,>));
+
+            // Event store services (kept separate and unchanged)
             services.AddSingleton<IEventStore, InMemoryEventStore>();
 
             // Domain services
