@@ -4,6 +4,30 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    
+    <!-- NuGet Package Metadata -->
+    <PackageId>ThirteenBytes.DDDPatterns.Primitives</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>ThirteenBytes</Authors>
+    <Company>ThirteenBytes</Company>
+    <Product>ThirteenBytes DDD Patterns Primitives</Product>
+    <Description>A comprehensive library of Domain-Driven Design (DDD) primitives and patterns including aggregate roots, entities, value objects, domain events, and repository abstractions. Provides strongly-typed IDs, event sourcing support, and common DDD building blocks for .NET applications.</Description>
+    <PackageTags>DDD;Domain-Driven-Design;Aggregate;Entity;ValueObject;DomainEvents;EventSourcing;Repository;CQRS</PackageTags>
+    <PackageProjectUrl>https://github.com/thirteenbytes/ddd-patterns-primitives</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/thirteenbytes/ddd-patterns-primitives</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Copyright>© 2025 ThirteenBytes. All rights reserved.</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>

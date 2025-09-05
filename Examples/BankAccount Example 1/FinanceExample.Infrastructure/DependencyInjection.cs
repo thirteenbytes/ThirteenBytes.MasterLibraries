@@ -1,4 +1,3 @@
-using FCT.DDD.Primitives.Abstractions.Data;
 using FinanceExample.Application.Abstractions.Messaging;
 using FinanceExample.Infrastructure.Behaviors;
 using FinanceExample.Infrastructure.Clock;

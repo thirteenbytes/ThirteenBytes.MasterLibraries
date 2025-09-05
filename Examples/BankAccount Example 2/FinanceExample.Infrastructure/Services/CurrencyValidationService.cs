@@ -1,6 +1,6 @@
-using FCT.DDD.Primitives.Abstractions.Data;
 using FinanceExample.Application.Abstractions.Services;
 using FinanceExample.Domain.Common;
+using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
 using ThirteenBytes.DDDPatterns.Primitives.Common;
 
 namespace FinanceExample.Infrastructure.Services
@@ -44,7 +44,7 @@ namespace FinanceExample.Infrastructure.Services
 
             var currencyId = SupportedCurrencyId.From(currencyCode.ToUpperInvariant());
             var currency = await _currencyRepository.GetByIdAsync(currencyId, cancellationToken);
-            
+
             return currency?.IsActive == true;
         }
 

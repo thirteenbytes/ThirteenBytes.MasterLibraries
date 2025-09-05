@@ -1,7 +1,7 @@
-using FCT.DDD.Primitives.Abstractions.Data;
 using FinanceExample.Application.Abstractions.Messaging;
 using FinanceExample.Application.Contracts.BankAccounts;
 using FinanceExample.Domain.Accounts;
+using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
 using ThirteenBytes.DDDPatterns.Primitives.Common;
 
 namespace FinanceExample.Application.Features.BankAccounts
@@ -10,7 +10,7 @@ namespace FinanceExample.Application.Features.BankAccounts
     {
         public sealed record Query(Guid Id) : IQuery<Result<GetBankAccountByIdResponse>>;
 
-        internal sealed class Handler(IRepository<BankAccount, BankAccountId, Guid> repository) 
+        internal sealed class Handler(IRepository<BankAccount, BankAccountId, Guid> repository)
             : IRequestHandler<Query, Result<GetBankAccountByIdResponse>>
         {
             private readonly IRepository<BankAccount, BankAccountId, Guid> _repository = repository;

@@ -1,4 +1,3 @@
-using FCT.DDD.Primitives.Abstractions.Data;
 using FinanceExample.Application.Abstractions.Messaging;
 using FinanceExample.Application.Abstractions.Services;
 using FinanceExample.Application.Contracts.BankAccounts;

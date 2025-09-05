@@ -1,7 +1,7 @@
-using FCT.DDD.Primitives.Abstractions.Data;
 using FinanceExample.Application.Abstractions.Messaging;
 using FinanceExample.Application.Contracts.SupportedCurrencies;
 using FinanceExample.Domain.Common;
+using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
 using ThirteenBytes.DDDPatterns.Primitives.Common;
 
 namespace FinanceExample.Application.Features.SupportedCurrencies
@@ -10,7 +10,7 @@ namespace FinanceExample.Application.Features.SupportedCurrencies
     {
         public sealed record Query() : IQuery<Result<GetAllSupportedCurrenciesResponse>>;
 
-        internal sealed class Handler(IRepository<SupportedCurrency, SupportedCurrencyId, string> repository) 
+        internal sealed class Handler(IRepository<SupportedCurrency, SupportedCurrencyId, string> repository)
             : IRequestHandler<Query, Result<GetAllSupportedCurrenciesResponse>>
         {
             private readonly IRepository<SupportedCurrency, SupportedCurrencyId, string> _repository = repository;
@@ -18,7 +18,7 @@ namespace FinanceExample.Application.Features.SupportedCurrencies
             public async Task<Result<GetAllSupportedCurrenciesResponse>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var allCurrencies = await _repository.ListAsync(cancellationToken);
-                
+
                 // Only return active currencies
                 var activeCurrencies = allCurrencies
                     .Where(c => c.IsActive)

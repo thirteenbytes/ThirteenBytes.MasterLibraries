@@ -1,7 +1,7 @@
-﻿using FCT.DDD.Primitives.Abstractions.Data;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions;
+using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
 
 namespace FinanceExample.Infrastructure.InMemory
 {
@@ -30,7 +30,7 @@ namespace FinanceExample.Infrastructure.InMemory
 
         public Task<bool> AnyAsync(TId id, CancellationToken cancellationToken = default)
             => Task.FromResult(_store.ContainsKey(id.Value));
-        
+
         public Task AddAsync(T entity, CancellationToken cancellationToken = default)
         {
             // stage add; SaveChangesAsync will stamp audit + TryAdd

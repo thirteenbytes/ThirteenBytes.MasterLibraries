@@ -1,10 +1,8 @@
-using FCT.DDD.Primitives.Abstractions.Data;
 using FinanceExample.Application.Contracts.AccountHolders;
 using FinanceExample.Application.Features.AccountHolders;
 using FinanceExample.Domain.Accounts;
 using Moq;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
-using ThirteenBytes.DDDPatterns.Primitives.Common;
 
 namespace FinanceExample.UnitTests.ApplicationTests
 {
@@ -42,7 +40,7 @@ namespace FinanceExample.UnitTests.ApplicationTests
 
             // Verify repository interactions
             _mockRepository.Verify(x => x.AddAsync(
-                It.IsAny<AccountHolder>(), 
+                It.IsAny<AccountHolder>(),
                 It.IsAny<CancellationToken>()), Times.Once);
             _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
@@ -63,7 +61,7 @@ namespace FinanceExample.UnitTests.ApplicationTests
 
             // Verify no repository interactions occurred
             _mockRepository.Verify(x => x.AddAsync(
-                It.IsAny<AccountHolder>(), 
+                It.IsAny<AccountHolder>(),
                 It.IsAny<CancellationToken>()), Times.Never);
             _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -84,7 +82,7 @@ namespace FinanceExample.UnitTests.ApplicationTests
 
             // Verify no repository interactions occurred
             _mockRepository.Verify(x => x.AddAsync(
-                It.IsAny<AccountHolder>(), 
+                It.IsAny<AccountHolder>(),
                 It.IsAny<CancellationToken>()), Times.Never);
             _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -168,9 +166,9 @@ namespace FinanceExample.UnitTests.ApplicationTests
             var handler = new UpdateAccountHolder.Handler(_mockRepository.Object, _mockUnitOfWork.Object);
             var accountHolderId = Guid.NewGuid();
             var command = new UpdateAccountHolder.Command(
-                accountHolderId, 
-                "Jane", 
-                "Smith", 
+                accountHolderId,
+                "Jane",
+                "Smith",
                 "jane.smith@example.com");
 
             var existingAccountHolder = CreateTestAccountHolder();
@@ -193,7 +191,7 @@ namespace FinanceExample.UnitTests.ApplicationTests
             // Verify repository interactions
             _mockRepository.Verify(x => x.GetByIdAsync(It.IsAny<AccountHolderId>(), It.IsAny<CancellationToken>()), Times.Once);
             _mockRepository.Verify(x => x.UpdateAsync(
-                It.IsAny<AccountHolder>(), 
+                It.IsAny<AccountHolder>(),
                 It.IsAny<CancellationToken>()), Times.Once);
             _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
@@ -205,9 +203,9 @@ namespace FinanceExample.UnitTests.ApplicationTests
             var handler = new UpdateAccountHolder.Handler(_mockRepository.Object, _mockUnitOfWork.Object);
             var accountHolderId = Guid.NewGuid();
             var command = new UpdateAccountHolder.Command(
-                accountHolderId, 
-                "Jane", 
-                "Smith", 
+                accountHolderId,
+                "Jane",
+                "Smith",
                 "jane.smith@example.com");
 
             _mockRepository.Setup(x => x.GetByIdAsync(It.IsAny<AccountHolderId>(), It.IsAny<CancellationToken>()))
@@ -223,7 +221,7 @@ namespace FinanceExample.UnitTests.ApplicationTests
             // Verify interactions
             _mockRepository.Verify(x => x.GetByIdAsync(It.IsAny<AccountHolderId>(), It.IsAny<CancellationToken>()), Times.Once);
             _mockRepository.Verify(x => x.UpdateAsync(
-                It.IsAny<AccountHolder>(), 
+                It.IsAny<AccountHolder>(),
                 It.IsAny<CancellationToken>()), Times.Never);
             _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -235,9 +233,9 @@ namespace FinanceExample.UnitTests.ApplicationTests
             var handler = new UpdateAccountHolder.Handler(_mockRepository.Object, _mockUnitOfWork.Object);
             var accountHolderId = Guid.NewGuid();
             var command = new UpdateAccountHolder.Command(
-                accountHolderId, 
-                "Jane", 
-                "Smith", 
+                accountHolderId,
+                "Jane",
+                "Smith",
                 "invalid-email");
 
             var existingAccountHolder = CreateTestAccountHolder();
@@ -254,7 +252,7 @@ namespace FinanceExample.UnitTests.ApplicationTests
             // Verify no update occurred
             _mockRepository.Verify(x => x.GetByIdAsync(It.IsAny<AccountHolderId>(), It.IsAny<CancellationToken>()), Times.Once);
             _mockRepository.Verify(x => x.UpdateAsync(
-                It.IsAny<AccountHolder>(), 
+                It.IsAny<AccountHolder>(),
                 It.IsAny<CancellationToken>()), Times.Never);
             _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -266,11 +264,11 @@ namespace FinanceExample.UnitTests.ApplicationTests
         private static AccountHolder CreateTestAccountHolder()
         {
             var result = AccountHolder.Create(
-                "John", 
-                "Doe", 
-                "john.doe@example.com", 
+                "John",
+                "Doe",
+                "john.doe@example.com",
                 HolderType.Primary);
-            
+
             return result.Value!;
         }
 

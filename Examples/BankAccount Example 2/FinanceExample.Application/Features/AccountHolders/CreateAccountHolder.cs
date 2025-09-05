@@ -1,5 +1,4 @@
-﻿using FCT.DDD.Primitives.Abstractions.Data;
-using FinanceExample.Application.Abstractions.Messaging;
+﻿using FinanceExample.Application.Abstractions.Messaging;
 using FinanceExample.Application.Contracts.AccountHolders;
 using FinanceExample.Domain.Accounts;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
@@ -23,8 +22,8 @@ namespace FinanceExample.Application.Features.AccountHolders
                 var createResult = AccountHolder.Create(
                     request.FirstName,
                     request.LastName,
-                    request.EmailAddress, 
-                    HolderType.Primary); 
+                    request.EmailAddress,
+                    HolderType.Primary);
 
                 if (createResult.IsFailure)
                 {
@@ -34,7 +33,7 @@ namespace FinanceExample.Application.Features.AccountHolders
                 var accountHolder = createResult.Value!;
                 await _repository.AddAsync(accountHolder, cancellationToken);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
-                
+
                 return new CreateAccountHolderResponse(accountHolder.Id.Value);
             }
         }

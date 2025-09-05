@@ -1,7 +1,7 @@
-using FCT.DDD.Primitives.Abstractions.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions;
+using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
 
 namespace FinanceExample.Infrastructure.SqliteData
 {
