@@ -71,7 +71,7 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data
         /// <param name="pageSize">The number of events per page.</param>
         /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
         /// <returns>A task containing a paginated result of domain events.</returns>
-        Task<PagedEventResult> GetEventsPagedAsync<TId, TValue>(
+        Task<PagedResult<IDomainEvent>> GetEventsPagedAsync<TId, TValue>(
             TId aggregateId,
             int pageNumber,
             int pageSize,
@@ -105,25 +105,6 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data
         /// <returns>A task containing true if the aggregate exists; otherwise, false.</returns>
         Task<bool> AggregateExistsAsync<TId, TValue>(
             TId aggregateId,
-            CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>;
-
-        /// <summary>
-        /// Retrieves a paginated list of stored events (with metadata) for a specific aggregate.
-        /// Unlike GetEventsPagedAsync, this includes event metadata such as timestamps and version numbers.
-        /// </summary>
-        /// <typeparam name="TId">The type of the aggregate identifier.</typeparam>
-        /// <typeparam name="TValue">The underlying type of the identifier value.</typeparam>
-        /// <param name="aggregateId">The unique identifier of the aggregate.</param>
-        /// <param name="pageNumber">The page number to retrieve (1-based).</param>
-        /// <param name="pageSize">The number of events per page.</param>
-        /// <param name="cancellationToken">A cancellation token to cancel the operation.</param>
-        /// <returns>A task containing a paginated result of stored events with metadata.</returns>
-        Task<PagedStoredEventResult> GetStoredEventsPagedAsync<TId, TValue>(
-            TId aggregateId,
-            int pageNumber,
-            int pageSize,
             CancellationToken cancellationToken = default)
             where TId : IEntityId<TId, TValue>
             where TValue : notnull, IEquatable<TValue>;

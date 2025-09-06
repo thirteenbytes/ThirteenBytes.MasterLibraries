@@ -24,18 +24,18 @@ namespace FinanceExample.Application.Features.BankAccounts
             {
                 var bankAccountId = BankAccountId.From(request.BankAccountId);
                 
-                var pagedResult = await _eventStore.GetStoredEventsPagedAsync<BankAccountId, Guid>(
+                var pagedResult = await _eventStore.GetEventsPagedAsync<BankAccountId, Guid>(
                     bankAccountId, 
                     request.PageNumber, 
                     request.PageSize, 
                     cancellationToken);
 
-                var dynamicEvents = pagedResult.Events.Select(storedEvent => new DynamicEventDetail
+                var dynamicEvents = pagedResult.Items.Select(domainEvent => new DynamicEventDetail
                 {
-                    EventId = storedEvent.EventId,
-                    EventType = storedEvent.EventType,
-                    Timestamp = storedEvent.Timestamp, 
-                    EventData = JsonSerializer.SerializeToElement(storedEvent.EventData, storedEvent.EventData.GetType(), new JsonSerializerOptions 
+                    EventId = domainEvent.Id,
+                    EventType = domainEvent.GetType().Name,
+                    Timestamp = DateTime.UtcNow, // For display purposes - could be extracted from event if available
+                    EventData = JsonSerializer.SerializeToElement(domainEvent, domainEvent.GetType(), new JsonSerializerOptions 
                     { 
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                         WriteIndented = true

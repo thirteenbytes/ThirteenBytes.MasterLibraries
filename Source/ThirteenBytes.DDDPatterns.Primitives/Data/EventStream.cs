@@ -4,7 +4,7 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Data
 {
     /// <summary>
     /// Represents a complete event stream for a specific aggregate instance.
-    /// Contains the aggregate's metadata along with all its stored events,
+    /// Contains the aggregate's metadata along with all its domain events,
     /// providing a complete audit trail and state reconstruction capability.
     /// </summary>
     public sealed class EventStream
@@ -28,9 +28,9 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Data
         public int Version { get; set; }
 
         /// <summary>
-        /// Gets or sets the collection of stored events that make up this event stream.
-        /// Events are typically ordered by their version/sequence number to maintain proper ordering.
+        /// Gets or sets the collection of domain events that make up this event stream.
+        /// Events are ordered by their sequence/version number to maintain proper ordering.
         /// </summary>
-        public List<StoredEvent> Events { get; init; } = new();
+        public List<IDomainEvent> Events { get; init; } = new();
     }
 }

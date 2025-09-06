@@ -1,3 +1,4 @@
+using FinanceExample.Infrastructure.InMemory.Models;
 using System.Collections.Concurrent;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Clock;
@@ -7,14 +8,15 @@ using ThirteenBytes.DDDPatterns.Primitives.Data;
 
 namespace FinanceExample.Infrastructure.InMemory
 {
+
     internal sealed class InMemoryEventStore : IEventStore
     {
-        private static readonly ConcurrentDictionary<string, EventStream> _eventStreams = new();
+        private static readonly ConcurrentDictionary<string, InMemoryEventStream> _eventStreams = new();
         private readonly IDateTimeProvider _clock;
 
         public InMemoryEventStore(IDateTimeProvider clock)
         {
-            _clock = clock;
+            _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         }
 
         public Task AppendEventsAsync<TId, TValue>(
@@ -34,7 +36,7 @@ namespace FinanceExample.Infrastructure.InMemory
             if (!eventsList.Any())
                 return Task.CompletedTask;
 
-            var stream = _eventStreams.GetOrAdd(streamKey, _ => new EventStream
+            var stream = _eventStreams.GetOrAdd(streamKey, _ => new InMemoryEventStream
             {
                 AggregateId = aggregateId.Value.ToString()!,
                 AggregateType = typeof(TId).Name,
@@ -54,7 +56,7 @@ namespace FinanceExample.Infrastructure.InMemory
                 foreach (var domainEvent in eventsList)
                 {
                     stream.Version++;
-                    stream.Events.Add(new StoredEvent
+                    stream.Events.Add(new InMemoryStoredEvent
                     {
                         EventId = domainEvent.Id,
                         EventType = domainEvent.GetType().Name,
@@ -106,7 +108,7 @@ namespace FinanceExample.Infrastructure.InMemory
             }
         }
 
-        public Task<PagedEventResult> GetEventsPagedAsync<TId, TValue>(
+        public Task<PagedResult<IDomainEvent>> GetEventsPagedAsync<TId, TValue>(
             TId aggregateId,
             int pageNumber,
             int pageSize,
@@ -127,9 +129,9 @@ namespace FinanceExample.Infrastructure.InMemory
 
             if (!_eventStreams.TryGetValue(streamKey, out var stream))
             {
-                return Task.FromResult(new PagedEventResult
+                return Task.FromResult(new PagedResult<IDomainEvent>
                 {
-                    Events = Enumerable.Empty<IDomainEvent>(),
+                    Items = Enumerable.Empty<IDomainEvent>(),
                     TotalCount = 0,
                     PageNumber = pageNumber,
                     PageSize = pageSize
@@ -148,9 +150,9 @@ namespace FinanceExample.Infrastructure.InMemory
                     .Select(e => e.EventData)
                     .ToList();
 
-                return Task.FromResult(new PagedEventResult
+                return Task.FromResult(new PagedResult<IDomainEvent>
                 {
-                    Events = events,
+                    Items = events,
                     TotalCount = totalCount,
                     PageNumber = pageNumber,
                     PageSize = pageSize
@@ -193,57 +195,6 @@ namespace FinanceExample.Infrastructure.InMemory
             var exists = _eventStreams.ContainsKey(streamKey);
 
             return Task.FromResult(exists);
-        }
-
-        public Task<PagedStoredEventResult> GetStoredEventsPagedAsync<TId, TValue>(
-            TId aggregateId,
-            int pageNumber,
-            int pageSize,
-            CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
-        {
-            if (aggregateId == null)
-                throw new ArgumentNullException(nameof(aggregateId));
-
-            if (pageNumber < 1)
-                throw new ArgumentException("Page number must be greater than 0", nameof(pageNumber));
-
-            if (pageSize < 1)
-                throw new ArgumentException("Page size must be greater than 0", nameof(pageSize));
-
-            var streamKey = GetStreamKey<TId, TValue>(aggregateId);
-
-            if (!_eventStreams.TryGetValue(streamKey, out var stream))
-            {
-                return Task.FromResult(new PagedStoredEventResult
-                {
-                    Events = Enumerable.Empty<StoredEvent>(),
-                    TotalCount = 0,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize
-                });
-            }
-
-            lock (stream)
-            {
-                var totalCount = stream.Events.Count;
-                var skip = (pageNumber - 1) * pageSize;
-
-                var events = stream.Events
-                    .OrderBy(e => e.Version)
-                    .Skip(skip)
-                    .Take(pageSize)
-                    .ToList();
-
-                return Task.FromResult(new PagedStoredEventResult
-                {
-                    Events = events,
-                    TotalCount = totalCount,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize
-                });
-            }
         }
 
         private static string GetStreamKey<TId, TValue>(TId aggregateId)

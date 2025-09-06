@@ -29,9 +29,9 @@ namespace FinanceExample.Infrastructure
             services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<InMemoryDatabase>());
             services.AddScoped(typeof(IRepository<,,>), typeof(InMemoryRepository<,,>));
 
-            // Event store services (kept separate)
-            services.AddSingleton<IEventStore, InMemoryEventStore>();
-
+            // Event Store services
+            services.AddScoped<IEventStore, InMemoryEventStore>();
+            
             // Clock services
             services.AddSingleton<IDateTimeProvider, SystemClockDateTimeProvider>();
 

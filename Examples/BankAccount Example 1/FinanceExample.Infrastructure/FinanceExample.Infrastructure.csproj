@@ -25,4 +25,8 @@
     <ProjectReference Include="..\FinanceExample.Application\FinanceExample.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="FinanceExample.UnitTests" />
+  </ItemGroup>
+
 </Project>

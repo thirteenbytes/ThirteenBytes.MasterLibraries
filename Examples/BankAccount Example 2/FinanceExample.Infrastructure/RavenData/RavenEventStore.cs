@@ -1,23 +1,19 @@
-using FinanceExample.Infrastructure.RavenData.Models;
 using Raven.Client.Documents;
-using Raven.Client.Documents.Session;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions;
-using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Clock;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Events;
 using ThirteenBytes.DDDPatterns.Primitives.Data;
+using FinanceExample.Infrastructure.RavenData.Models;
 
 namespace FinanceExample.Infrastructure.RavenData
 {
     internal sealed class RavenEventStore : IEventStore
     {
         private readonly IDocumentStore _documentStore;
-        private readonly IDateTimeProvider _clock;
 
-        public RavenEventStore(IDocumentStore documentStore, IDateTimeProvider clock)
+        public RavenEventStore(IDocumentStore documentStore)
         {
-            _documentStore = documentStore;
-            _clock = clock;
+            _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
         }
 
         public async Task AppendEventsAsync<TId, TValue>(
@@ -31,10 +27,6 @@ namespace FinanceExample.Infrastructure.RavenData
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
 
-            var eventsList = events.ToList();
-            if (!eventsList.Any())
-                return;
-
             using var session = _documentStore.OpenAsyncSession();
 
             var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.Value.ToString()!);
@@ -42,35 +34,38 @@ namespace FinanceExample.Infrastructure.RavenData
 
             if (stream == null)
             {
+                if (expectedVersion != 0)
+                {
+                    throw new InvalidOperationException(
+                        $"Expected version {expectedVersion}, but aggregate does not exist");
+                }
+
                 stream = new RavenEventStream
                 {
                     Id = streamId,
                     AggregateId = aggregateId.Value.ToString()!,
                     AggregateType = typeof(TId).Name,
-                    Version = 0,
-                    Events = new List<RavenStoredEvent>()
-                    };
+                    Version = 0
+                };
             }
-
-            // Optimistic concurrency check
-            if (stream.Version != expectedVersion)
+            else if (stream.Version != expectedVersion)
             {
                 throw new InvalidOperationException(
-                    $"Concurrency conflict: Expected version {expectedVersion}, but current version is {stream.Version}");
+                    $"Expected version {expectedVersion}, but current version is {stream.Version}");
             }
 
-            var timestamp = _clock.UtcNow;
-            foreach (var domainEvent in eventsList)
+            foreach (var domainEvent in events)
             {
-                stream.Version++;
-                stream.Events.Add(new RavenStoredEvent
+                var storedEvent = new RavenStoredEvent
                 {
-                    EventId = domainEvent.Id,
-                    EventType = domainEvent.GetType().Name,
+                    EventId = Guid.NewGuid(),
+                    EventType = domainEvent.GetType().AssemblyQualifiedName!,
                     EventData = domainEvent,
-                    Timestamp = timestamp,
-                    Version = stream.Version
-                });
+                    Timestamp = DateTime.UtcNow,
+                    Version = ++stream.Version
+                };
+
+                stream.Events.Add(storedEvent);
             }
 
             await session.StoreAsync(stream, cancellationToken);
@@ -83,7 +78,23 @@ namespace FinanceExample.Infrastructure.RavenData
             where TId : IEntityId<TId, TValue>
             where TValue : notnull, IEquatable<TValue>
         {
-            return await GetEventsAsync<TId, TValue>(aggregateId, 0, cancellationToken);
+            if (aggregateId == null)
+                throw new ArgumentNullException(nameof(aggregateId));
+
+            using var session = _documentStore.OpenAsyncSession();
+
+            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.Value.ToString()!);
+            var stream = await session.LoadAsync<RavenEventStream>(streamId, cancellationToken);
+
+            if (stream == null)
+            {
+                return Enumerable.Empty<IDomainEvent>();
+            }
+
+            return stream.Events
+                .OrderBy(e => e.Version)
+                .Select(e => e.EventData)
+                .ToList();
         }
 
         public async Task<IEnumerable<IDomainEvent>> GetEventsAsync<TId, TValue>(
@@ -102,16 +113,18 @@ namespace FinanceExample.Infrastructure.RavenData
             var stream = await session.LoadAsync<RavenEventStream>(streamId, cancellationToken);
 
             if (stream == null)
+            {
                 return Enumerable.Empty<IDomainEvent>();
+            }
 
             return stream.Events
-                .Where(e => e.Version > fromVersion)
+                .Where(e => e.Version >= fromVersion)
                 .OrderBy(e => e.Version)
                 .Select(e => e.EventData)
                 .ToList();
         }
 
-        public async Task<PagedEventResult> GetEventsPagedAsync<TId, TValue>(
+        public async Task<PagedResult<IDomainEvent>> GetEventsPagedAsync<TId, TValue>(
             TId aggregateId,
             int pageNumber,
             int pageSize,
@@ -135,9 +148,9 @@ namespace FinanceExample.Infrastructure.RavenData
 
             if (stream == null)
             {
-                return new PagedEventResult
+                return new PagedResult<IDomainEvent>
                 {
-                    Events = Enumerable.Empty<IDomainEvent>(),
+                    Items = Enumerable.Empty<IDomainEvent>(),
                     TotalCount = 0,
                     PageNumber = pageNumber,
                     PageSize = pageSize
@@ -154,9 +167,9 @@ namespace FinanceExample.Infrastructure.RavenData
                 .Select(e => e.EventData)
                 .ToList();
 
-            return new PagedEventResult
+            return new PagedResult<IDomainEvent>
             {
-                Events = events,
+                Items = events,
                 TotalCount = totalCount,
                 PageNumber = pageNumber,
                 PageSize = pageSize
@@ -195,65 +208,6 @@ namespace FinanceExample.Infrastructure.RavenData
             var exists = await session.Advanced.ExistsAsync(streamId, cancellationToken);
 
             return exists;
-        }
-
-        public async Task<PagedStoredEventResult> GetStoredEventsPagedAsync<TId, TValue>(
-            TId aggregateId,
-            int pageNumber,
-            int pageSize,
-            CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
-        {
-            if (aggregateId == null)
-                throw new ArgumentNullException(nameof(aggregateId));
-
-            if (pageNumber < 1)
-                throw new ArgumentException("Page number must be greater than 0", nameof(pageNumber));
-
-            if (pageSize < 1)
-                throw new ArgumentException("Page size must be greater than 0", nameof(pageSize));
-
-            using var session = _documentStore.OpenAsyncSession();
-
-            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.Value.ToString()!);
-            var stream = await session.LoadAsync<RavenEventStream>(streamId, cancellationToken);
-
-            if (stream == null)
-            {
-                return new PagedStoredEventResult
-                {
-                    Events = Enumerable.Empty<StoredEvent>(),
-                    TotalCount = 0,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize
-                };
-            }
-
-            var totalCount = stream.Events.Count;
-            var skip = (pageNumber - 1) * pageSize;
-
-            var events = stream.Events
-                .OrderBy(e => e.Version)
-                .Skip(skip)
-                .Take(pageSize)
-                .Select(e => new StoredEvent
-                {
-                    EventId = e.EventId,
-                    EventType = e.EventType,
-                    EventData = e.EventData,
-                    Timestamp = e.Timestamp,
-                    Version = e.Version
-                })
-                .ToList();
-
-            return new PagedStoredEventResult
-            {
-                Events = events,
-                TotalCount = totalCount,
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            };
         }
     }
 }

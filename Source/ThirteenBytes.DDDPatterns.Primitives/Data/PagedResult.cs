@@ -1,21 +1,20 @@
-using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Events;
-
 namespace ThirteenBytes.DDDPatterns.Primitives.Data
 {
     /// <summary>
-    /// Represents a paginated collection of domain events returned from an event store query.
-    /// Provides pagination metadata and navigation information for large event streams.
+    /// Represents a paginated collection of items returned from a query.
+    /// Provides pagination metadata and navigation information for large datasets.
     /// </summary>
-    public sealed class PagedEventResult
+    /// <typeparam name="T">The type of items in the paginated collection.</typeparam>
+    public sealed class PagedResult<T>
     {
         /// <summary>
-        /// Gets the domain events for the current page.
-        /// Contains only the events for the requested page, not the entire event stream.
+        /// Gets the items for the current page.
+        /// Contains only the items for the requested page, not the entire dataset.
         /// </summary>
-        public IEnumerable<IDomainEvent> Events { get; init; } = Enumerable.Empty<IDomainEvent>();
+        public IEnumerable<T> Items { get; init; } = Enumerable.Empty<T>();
 
         /// <summary>
-        /// Gets the total number of events across all pages.
+        /// Gets the total number of items across all pages.
         /// Used to calculate pagination metadata and display total counts.
         /// </summary>
         public int TotalCount { get; init; }
@@ -27,8 +26,8 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Data
         public int PageNumber { get; init; }
 
         /// <summary>
-        /// Gets the number of events per page.
-        /// Determines how many events are included in each page of results.
+        /// Gets the number of items per page.
+        /// Determines how many items are included in each page of results.
         /// </summary>
         public int PageSize { get; init; }
 
