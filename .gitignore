@@ -364,3 +364,6 @@ FodyWeavers.xsd
 /Examples/BankAccount Example 2/FinanceExample.WebApi/finance-banking-dev.db
 /Examples/BankAccount Example 2/FinanceExample.WebApi/finance-banking-dev.db-shm
 /Examples/BankAccount Example 2/FinanceExample.WebApi/finance-banking-dev.db-wal
+/Examples/BankAccount Example 2/FinanceExample.WebApi/Data/SqliteDb/finance-dev.db
+/Examples/BankAccount Example 2/FinanceExample.WebApi/Data/SqliteDb/finance-dev.db-shm
+/Examples/BankAccount Example 2/FinanceExample.WebApi/Data/SqliteDb/finance-dev.db-wal
