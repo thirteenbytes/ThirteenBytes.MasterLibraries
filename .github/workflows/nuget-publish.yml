@@ -1,0 +1,43 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    branches:
+      - release
+      - beta
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.10.2
+        with:
+          versionSpec: '5.x'
+
+      - name: Run GitVersion
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.10.2
+
+      - name: Restore dependencies
+        run: dotnet restore Source/ThirteenBytes.DDDPatterns.Primitives/ThirteenBytes.DDDPatterns.Primitives.csproj
+
+      - name: Build
+        run: dotnet build Source/ThirteenBytes.DDDPatterns.Primitives/ThirteenBytes.DDDPatterns.Primitives.csproj --configuration Release --no-restore
+
+      - name: Pack NuGet
+        run: dotnet pack Source/ThirteenBytes.DDDPatterns.Primitives/ThirteenBytes.DDDPatterns.Primitives.csproj --configuration Release --no-build -p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersionV2 }}
+
+      - name: Publish to NuGet
+        run: dotnet nuget push Source/ThirteenBytes.DDDPatterns.Primitives/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
