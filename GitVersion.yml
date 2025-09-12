@@ -17,6 +17,7 @@ branches:
     regex: ^beta$
     increment: Inherit
     tag: 'beta'
+    source-branches: ['master']
     
 ignore:
   sha: []
