@@ -10,9 +10,11 @@ patch-version-bump-message: '\+semver:\s?(fix|patch)'
 
 branches:
   release:
+    regex: ^release$
     increment: Inherit
     prevent-increment-of-merged-branch-version: true
   beta:
+    regex: ^beta$
     increment: Inherit
     tag: 'beta'
     
