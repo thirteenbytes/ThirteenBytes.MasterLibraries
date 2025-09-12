@@ -24,7 +24,7 @@ namespace FinanceExample.Application.Features.BankAccounts
             {
                 var bankAccountId = BankAccountId.From(request.BankAccountId);
                 
-                var pagedResult = await _eventStore.GetEventsPagedAsync<BankAccountId, Guid>(
+                var pagedResult = await _eventStore.GetEventsPagedAsync<BankAccountId>(
                     bankAccountId, 
                     request.PageNumber, 
                     request.PageSize, 

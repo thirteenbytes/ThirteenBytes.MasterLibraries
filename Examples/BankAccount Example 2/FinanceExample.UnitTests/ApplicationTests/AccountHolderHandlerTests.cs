@@ -8,12 +8,12 @@ namespace FinanceExample.UnitTests.ApplicationTests
 {
     public class AccountHolderHandlerTests
     {
-        private readonly Mock<IRepository<AccountHolder, AccountHolderId, Guid>> _mockRepository;
+        private readonly Mock<IRepository<AccountHolder, AccountHolderId>> _mockRepository;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
 
         public AccountHolderHandlerTests()
         {
-            _mockRepository = new Mock<IRepository<AccountHolder, AccountHolderId, Guid>>();
+            _mockRepository = new Mock<IRepository<AccountHolder, AccountHolderId>>();
             _mockUnitOfWork = new Mock<IUnitOfWork>();
         }
 

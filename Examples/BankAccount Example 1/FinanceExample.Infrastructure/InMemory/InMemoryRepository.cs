@@ -5,13 +5,12 @@ using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
 
 namespace FinanceExample.Infrastructure.InMemory
 {
-    internal sealed class InMemoryRepository<T, TId, TValue>(InMemoryDatabase database)
-        : IRepository<T, TId, TValue>
-        where T : class, IEntity<TId, TValue>
-        where TId : IEntityId<TId, TValue>
-        where TValue : notnull, IEquatable<TValue>
+    internal sealed class InMemoryRepository<T, TId>(InMemoryDatabase database)
+        : IRepository<T, TId>
+        where T : class, IEntity<TId>
+        where TId : notnull
     {
-        private readonly ConcurrentDictionary<TValue, T> _store = database.GetStore<T, TId, TValue>();
+        private readonly ConcurrentDictionary<object, T> _store = database.GetStore<T, TId>();
 
         public Task<T?> GetAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
         {
@@ -21,7 +20,7 @@ namespace FinanceExample.Infrastructure.InMemory
 
         public Task<T?> GetByIdAsync(TId id, CancellationToken cancellationToken = default)
         {
-            _store.TryGetValue(id.Value, out var entity);
+            _store.TryGetValue(id, out var entity);
             return Task.FromResult(entity);
         }
 
@@ -29,26 +28,26 @@ namespace FinanceExample.Infrastructure.InMemory
             => Task.FromResult(_store.Values.ToList());
 
         public Task<bool> AnyAsync(TId id, CancellationToken cancellationToken = default)
-            => Task.FromResult(_store.ContainsKey(id.Value));
+            => Task.FromResult(_store.ContainsKey(id));
 
         public Task AddAsync(T entity, CancellationToken cancellationToken = default)
         {
             // stage add; SaveChangesAsync will stamp audit + TryAdd
-            database.TrackAdd<T, TValue>(entity.Id.Value, entity);
+            database.TrackAdd<T>(entity.Id, entity);
             return Task.CompletedTask;
         }
 
         public Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
         {
             // stage update; SaveChangesAsync will stamp LastModified + upsert
-            database.TrackUpdate<T, TValue>(entity.Id.Value, entity);
+            database.TrackUpdate<T>(entity.Id, entity);
             return Task.CompletedTask;
         }
 
         public Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
         {
             // stage remove; SaveChangesAsync will TryRemove
-            database.TrackRemove<T, TValue>(entity.Id.Value);
+            database.TrackRemove<T>(entity.Id);
             return Task.CompletedTask;
         }
     }

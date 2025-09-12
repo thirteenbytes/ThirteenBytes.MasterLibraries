@@ -10,11 +10,9 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data
     /// </summary>
     /// <typeparam name="T">The type of the aggregate root entity.</typeparam>
     /// <typeparam name="TId">The type of the entity's identifier.</typeparam>
-    /// <typeparam name="TValue">The underlying type of the identifier value.</typeparam>
-    public interface IRepository<T, TId, TValue>
-        where T : IEntity<TId, TValue>
-        where TId : IEntityId<TId, TValue>
-        where TValue : notnull, IEquatable<TValue>
+    public interface IRepository<T, TId>
+        where T : IEntity<TId>
+        where TId : notnull
     {
         /// <summary>
         /// Retrieves a single entity that matches the specified predicate.

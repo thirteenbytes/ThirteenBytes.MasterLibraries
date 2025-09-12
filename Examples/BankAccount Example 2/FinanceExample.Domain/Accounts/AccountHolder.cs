@@ -4,7 +4,7 @@ using ThirteenBytes.DDDPatterns.Primitives.Common;
 
 namespace FinanceExample.Domain.Accounts
 {
-    public class AccountHolder : AuditEntity<AccountHolderId, Guid>
+    public class AccountHolder : AuditEntity<AccountHolderId>
     {
         public FullName Name { get; private set; } = null!;
         public EmailAddress EmailAddress { get; private set; } = null!;

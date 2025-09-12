@@ -16,14 +16,14 @@ namespace FinanceExample.Application.Features.BankAccounts
             string Currency) : IRequest<Result<OpenBankAccountResponse>>;
 
         internal sealed class Handler(
-            IRepository<BankAccount, BankAccountId, Guid> bankAccountRepository,
-            IRepository<AccountHolder, AccountHolderId, Guid> accountHolderRepository,
+            IRepository<BankAccount, BankAccountId> bankAccountRepository,
+            IRepository<AccountHolder, AccountHolderId> accountHolderRepository,
             ICurrencyValidationService currencyValidationService,
             IEventStore eventStore,
             IUnitOfWork unitOfWork) : IRequestHandler<Command, Result<OpenBankAccountResponse>>
         {
-            private readonly IRepository<BankAccount, BankAccountId, Guid> _bankAccountRepository = bankAccountRepository;
-            private readonly IRepository<AccountHolder, AccountHolderId, Guid> _accountHolderRepository = accountHolderRepository;
+            private readonly IRepository<BankAccount, BankAccountId> _bankAccountRepository = bankAccountRepository;
+            private readonly IRepository<AccountHolder, AccountHolderId> _accountHolderRepository = accountHolderRepository;
             private readonly ICurrencyValidationService _currencyValidationService = currencyValidationService;
             private readonly IEventStore _eventStore = eventStore;
             private readonly IUnitOfWork _unitOfWork = unitOfWork;

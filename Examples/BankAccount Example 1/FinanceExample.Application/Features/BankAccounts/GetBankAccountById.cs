@@ -10,10 +10,10 @@ namespace FinanceExample.Application.Features.BankAccounts
     {
         public sealed record Query(Guid Id) : IQuery<Result<GetBankAccountByIdResponse>>;
 
-        internal sealed class Handler(IRepository<BankAccount, BankAccountId, Guid> repository)
+        internal sealed class Handler(IRepository<BankAccount, BankAccountId> repository)
             : IRequestHandler<Query, Result<GetBankAccountByIdResponse>>
         {
-            private readonly IRepository<BankAccount, BankAccountId, Guid> _repository = repository;
+            private readonly IRepository<BankAccount, BankAccountId> _repository = repository;
 
             public async Task<Result<GetBankAccountByIdResponse>> Handle(Query request, CancellationToken cancellationToken)
             {

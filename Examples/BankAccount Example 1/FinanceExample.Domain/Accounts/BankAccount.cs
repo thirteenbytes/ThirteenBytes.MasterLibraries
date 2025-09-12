@@ -5,7 +5,7 @@ using ThirteenBytes.DDDPatterns.Primitives.Common;
 
 namespace FinanceExample.Domain.Accounts
 {
-    public class BankAccount : AggregateRoot<BankAccountId, Guid>
+    public class BankAccount : AggregateRoot<BankAccountId>
     {
         public AccountHolderId AccountHolderId { get; private set; } = null!;
         public Money Balance { get; private set; } = null!;

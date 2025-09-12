@@ -16,12 +16,12 @@ namespace FinanceExample.Application.Features.BankAccounts
             string Currency) : IRequest<Result<WithdrawFromBankAccountResponse>>;
 
         internal sealed class Handler(
-            IRepository<BankAccount, BankAccountId, Guid> repository,
+            IRepository<BankAccount, BankAccountId> repository,
             ICurrencyValidationService currencyValidationService,
             IEventStore eventStore,
             IUnitOfWork unitOfWork) : IRequestHandler<Command, Result<WithdrawFromBankAccountResponse>>
         {
-            private readonly IRepository<BankAccount, BankAccountId, Guid> _repository = repository;
+            private readonly IRepository<BankAccount, BankAccountId> _repository = repository;
             private readonly ICurrencyValidationService _currencyValidationService = currencyValidationService;
             private readonly IEventStore _eventStore = eventStore;
             private readonly IUnitOfWork _unitOfWork = unitOfWork;
@@ -45,7 +45,7 @@ namespace FinanceExample.Application.Features.BankAccounts
                 }
 
                 // Get current version for optimistic concurrency
-                var currentVersion = await _eventStore.GetAggregateVersionAsync<BankAccountId, Guid>(
+                var currentVersion = await _eventStore.GetAggregateVersionAsync<BankAccountId>(
                     bankAccountId, cancellationToken);
 
                 // Perform the withdrawal

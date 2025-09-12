@@ -5,10 +5,9 @@ using ThirteenBytes.DDDPatterns.Primitives.Abstractions.Data;
 
 namespace FinanceExample.Infrastructure.SqliteData
 {
-    public class SqliteRepository<T, TId, TValue> : IRepository<T, TId, TValue>
-        where T : class, IEntity<TId, TValue>
-        where TId : IEntityId<TId, TValue>
-        where TValue : notnull, IEquatable<TValue>
+    public class SqliteRepository<T, TId> : IRepository<T, TId>
+        where T : class, IEntity<TId>
+        where TId : notnull
     {
         private readonly FinanceDbContext _context;
         private readonly DbSet<T> _dbSet;

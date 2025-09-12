@@ -16,10 +16,10 @@ namespace FinanceExample.Application.Features.AccountHolders
             string EmailAddress) : IRequest<Result<UpdateAccountHolderResponse>>;
 
         internal sealed class Handler(
-            IRepository<AccountHolder, AccountHolderId, Guid> repository,
+            IRepository<AccountHolder, AccountHolderId> repository,
             IUnitOfWork unitOfWork) : IRequestHandler<Command, Result<UpdateAccountHolderResponse>>
         {
-            private readonly IRepository<AccountHolder, AccountHolderId, Guid> _repository = repository;
+            private readonly IRepository<AccountHolder, AccountHolderId> _repository = repository;
             private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
             public async Task<Result<UpdateAccountHolderResponse>> Handle(Command request, CancellationToken cancellationToken)

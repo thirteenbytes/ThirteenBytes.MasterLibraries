@@ -16,20 +16,19 @@ namespace FinanceExample.Infrastructure.RavenData
             _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
         }
 
-        public async Task AppendEventsAsync<TId, TValue>(
+        public async Task AppendEventsAsync<TId>(
             TId aggregateId,
             IEnumerable<IDomainEvent> events,
             int expectedVersion,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
 
             using var session = _documentStore.OpenAsyncSession();
 
-            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.Value.ToString()!);
+            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.ToString()!);
             var stream = await session.LoadAsync<RavenEventStream>(streamId, cancellationToken);
 
             if (stream == null)
@@ -43,7 +42,7 @@ namespace FinanceExample.Infrastructure.RavenData
                 stream = new RavenEventStream
                 {
                     Id = streamId,
-                    AggregateId = aggregateId.Value.ToString()!,
+                    AggregateId = aggregateId.ToString()!,
                     AggregateType = typeof(TId).Name,
                     Version = 0
                 };
@@ -72,18 +71,17 @@ namespace FinanceExample.Infrastructure.RavenData
             await session.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<IDomainEvent>> GetEventsAsync<TId, TValue>(
+        public async Task<IEnumerable<IDomainEvent>> GetEventsAsync<TId>(
             TId aggregateId,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
 
             using var session = _documentStore.OpenAsyncSession();
 
-            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.Value.ToString()!);
+            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.ToString()!);
             var stream = await session.LoadAsync<RavenEventStream>(streamId, cancellationToken);
 
             if (stream == null)
@@ -97,19 +95,18 @@ namespace FinanceExample.Infrastructure.RavenData
                 .ToList();
         }
 
-        public async Task<IEnumerable<IDomainEvent>> GetEventsAsync<TId, TValue>(
+        public async Task<IEnumerable<IDomainEvent>> GetEventsAsync<TId>(
             TId aggregateId,
             int fromVersion,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
 
             using var session = _documentStore.OpenAsyncSession();
 
-            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.Value.ToString()!);
+            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.ToString()!);
             var stream = await session.LoadAsync<RavenEventStream>(streamId, cancellationToken);
 
             if (stream == null)
@@ -124,13 +121,12 @@ namespace FinanceExample.Infrastructure.RavenData
                 .ToList();
         }
 
-        public async Task<PagedResult<IDomainEvent>> GetEventsPagedAsync<TId, TValue>(
+        public async Task<PagedResult<IDomainEvent>> GetEventsPagedAsync<TId>(
             TId aggregateId,
             int pageNumber,
             int pageSize,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
@@ -143,7 +139,7 @@ namespace FinanceExample.Infrastructure.RavenData
 
             using var session = _documentStore.OpenAsyncSession();
 
-            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.Value.ToString()!);
+            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.ToString()!);
             var stream = await session.LoadAsync<RavenEventStream>(streamId, cancellationToken);
 
             if (stream == null)
@@ -176,35 +172,33 @@ namespace FinanceExample.Infrastructure.RavenData
             };
         }
 
-        public async Task<int> GetAggregateVersionAsync<TId, TValue>(
+        public async Task<int> GetAggregateVersionAsync<TId>(
             TId aggregateId,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
 
             using var session = _documentStore.OpenAsyncSession();
 
-            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.Value.ToString()!);
+            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.ToString()!);
             var stream = await session.LoadAsync<RavenEventStream>(streamId, cancellationToken);
 
             return stream?.Version ?? 0;
         }
 
-        public async Task<bool> AggregateExistsAsync<TId, TValue>(
+        public async Task<bool> AggregateExistsAsync<TId>(
             TId aggregateId,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
 
             using var session = _documentStore.OpenAsyncSession();
 
-            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.Value.ToString()!);
+            var streamId = RavenEventStream.CreateId(typeof(TId).Name, aggregateId.ToString()!);
             var exists = await session.Advanced.ExistsAsync(streamId, cancellationToken);
 
             return exists;

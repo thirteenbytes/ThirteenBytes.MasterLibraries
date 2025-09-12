@@ -27,7 +27,7 @@ namespace FinanceExample.Infrastructure
             // Data persistence services
             services.AddScoped<InMemoryDatabase>();
             services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<InMemoryDatabase>());
-            services.AddScoped(typeof(IRepository<,,>), typeof(InMemoryRepository<,,>));
+            services.AddScoped(typeof(IRepository<,>), typeof(InMemoryRepository<,>));
 
             // Event Store services
             services.AddScoped<IEventStore, InMemoryEventStore>();

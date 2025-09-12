@@ -4,7 +4,7 @@ using ThirteenBytes.DDDPatterns.Primitives.Common;
 
 namespace FinanceExample.Domain.Common
 {
-    public class SupportedCurrency : AuditEntity<SupportedCurrencyId, string>
+    public class SupportedCurrency : AuditEntity<SupportedCurrencyId>
     {
         public string CurrencyCode { get; private set; } = null!;
         public string CurrencyName { get; private set; } = null!;

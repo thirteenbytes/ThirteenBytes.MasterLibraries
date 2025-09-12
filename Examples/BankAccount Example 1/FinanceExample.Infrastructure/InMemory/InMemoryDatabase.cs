@@ -13,26 +13,25 @@ namespace FinanceExample.Infrastructure.InMemory
 
         public InMemoryDatabase(IDateTimeProvider clock) => _clock = clock;
 
-        public ConcurrentDictionary<TValue, T> GetStore<T, TId, TValue>()
+        public ConcurrentDictionary<object, T> GetStore<T, TId>()
             where T : class
-            where TValue : notnull
         {
-            return (ConcurrentDictionary<TValue, T>)_stores.GetOrAdd(
+            return (ConcurrentDictionary<object, T>)_stores.GetOrAdd(
                 typeof(T),
-                _ => new ConcurrentDictionary<TValue, T>());
+                _ => new ConcurrentDictionary<object, T>());
         }
 
         // repos call these instead of mutating the dictionary directly
-        public void TrackAdd<T, TValue>(TValue key, T entity)
-            where T : class where TValue : notnull =>
+        public void TrackAdd<T>(object key, T entity)
+            where T : class =>
             _operations.Add(TrackedOperation.Add(typeof(T), key!, entity!));
 
-        public void TrackUpdate<T, TValue>(TValue key, T entity)
-            where T : class where TValue : notnull =>
+        public void TrackUpdate<T>(object key, T entity)
+            where T : class =>
             _operations.Add(TrackedOperation.Update(typeof(T), key!, entity!));
 
-        public void TrackRemove<T, TValue>(TValue key)
-            where T : class where TValue : notnull =>
+        public void TrackRemove<T>(object key)
+            where T : class =>
             _operations.Add(TrackedOperation.Remove(typeof(T), key!));
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -44,7 +43,7 @@ namespace FinanceExample.Infrastructure.InMemory
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var storeObject = _stores[operation.EntityType];
-                dynamic store = storeObject; // ConcurrentDictionary<TKey, T>
+                dynamic store = storeObject; // ConcurrentDictionary<object, T>
 
                 switch (operation.Kind)
                 {

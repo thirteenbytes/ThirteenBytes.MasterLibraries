@@ -40,7 +40,7 @@ namespace FinanceExample.Infrastructure
 
             // Register FinanceDbContext as IUnitOfWork
             services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<FinanceDbContext>());
-            services.AddScoped(typeof(IRepository<,,>), typeof(SqliteRepository<,,>));
+            services.AddScoped(typeof(IRepository<,>), typeof(SqliteRepository<,>));
 
             // RavenDB Event store services (embedded)
             services.AddSingleton<IDocumentStore>(provider =>

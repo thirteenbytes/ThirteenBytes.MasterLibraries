@@ -10,10 +10,10 @@ namespace FinanceExample.Application.Features.SupportedCurrencies
     {
         public sealed record Query() : IQuery<Result<GetAllSupportedCurrenciesResponse>>;
 
-        internal sealed class Handler(IRepository<SupportedCurrency, SupportedCurrencyId, string> repository)
+        internal sealed class Handler(IRepository<SupportedCurrency, SupportedCurrencyId> repository)
             : IRequestHandler<Query, Result<GetAllSupportedCurrenciesResponse>>
         {
-            private readonly IRepository<SupportedCurrency, SupportedCurrencyId, string> _repository = repository;
+            private readonly IRepository<SupportedCurrency, SupportedCurrencyId> _repository = repository;
 
             public async Task<Result<GetAllSupportedCurrenciesResponse>> Handle(Query request, CancellationToken cancellationToken)
             {

@@ -7,11 +7,9 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions
     /// Extends Entity to include automatic audit tracking with creation and modification timestamps.
     /// Timestamps are typically managed by the persistence layer (e.g., Entity Framework interceptors).
     /// </summary>
-    /// <typeparam name="TId">The type of the entity's identifier, implementing IEntityId.</typeparam>
-    /// <typeparam name="TValue">The underlying type of the identifier value.</typeparam>
-    public abstract class AuditEntity<TId, TValue> : Entity<TId, TValue>, IAuditEntity
-        where TId : IEntityId<TId, TValue>
-        where TValue : notnull, IEquatable<TValue>
+    /// <typeparam name="TId">The type of the entity's identifier.</typeparam>
+    public abstract class AuditEntity<TId> : Entity<TId>, IAuditEntity
+        where TId : notnull
     {
         /// <summary>
         /// Gets or sets the UTC timestamp when the entity was created.

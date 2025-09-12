@@ -8,12 +8,9 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions
     /// Provides event sourcing support with automatic event management, version tracking,
     /// and in-memory event handler registration for domain events.
     /// </summary>
-    /// <typeparam name="TId">The type of the aggregate's identifier, implementing IEntityId.</typeparam>
-    /// <typeparam name="TValue">The underlying type of the identifier value.</typeparam>
-    public abstract class AggregateRoot<TId, TValue>
-        : AuditEntity<TId, TValue>, IAggregateRoot
-        where TId : IEntityId<TId, TValue>
-        where TValue : notnull, IEquatable<TValue>
+    /// <typeparam name="TId">The type of the aggregate's identifier.</typeparam>
+    public abstract class AggregateRoot<TId> : AuditEntity<TId>, IAggregateRoot
+        where TId : notnull
     {
         // Uncommitted domain events
         private readonly List<IDomainEvent> _domainEvents = new();
@@ -41,7 +38,7 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions
 
         /// <summary>
         /// Domain constructor that creates an aggregate root with the specified identifier.
-        /// Typically called with NewId() to create a new aggregate instance.
+        /// Typically called with a new identifier to create a new aggregate instance.
         /// </summary>
         /// <param name="id">The identifier for the aggregate root. Cannot be null.</param>
         protected AggregateRoot(TId id) : base(id) { }

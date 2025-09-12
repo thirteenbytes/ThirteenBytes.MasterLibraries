@@ -11,10 +11,10 @@ namespace FinanceExample.Application.Features.AccountHolders
         public sealed record Command(string FirstName, string LastName, string EmailAddress) : IRequest<Result<CreateAccountHolderResponse>>;
 
         internal sealed class Handler(
-            IRepository<AccountHolder, AccountHolderId, Guid> repository,
+            IRepository<AccountHolder, AccountHolderId> repository,
             IUnitOfWork unitOfWork) : IRequestHandler<Command, Result<CreateAccountHolderResponse>>
         {
-            private readonly IRepository<AccountHolder, AccountHolderId, Guid> _repository = repository;
+            private readonly IRepository<AccountHolder, AccountHolderId> _repository = repository;
             private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
             public async Task<Result<CreateAccountHolderResponse>> Handle(Command request, CancellationToken cancellationToken)

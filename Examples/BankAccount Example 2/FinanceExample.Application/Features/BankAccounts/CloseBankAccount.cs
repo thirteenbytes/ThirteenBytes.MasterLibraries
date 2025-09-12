@@ -12,11 +12,11 @@ namespace FinanceExample.Application.Features.BankAccounts
         public sealed record Command(Guid BankAccountId) : IRequest<Result<CloseBankAccountResponse>>;
 
         internal sealed class Handler(
-            IRepository<BankAccount, BankAccountId, Guid> repository,
+            IRepository<BankAccount, BankAccountId> repository,
             IEventStore eventStore,
             IUnitOfWork unitOfWork) : IRequestHandler<Command, Result<CloseBankAccountResponse>>
         {
-            private readonly IRepository<BankAccount, BankAccountId, Guid> _repository = repository;
+            private readonly IRepository<BankAccount, BankAccountId> _repository = repository;
             private readonly IEventStore _eventStore = eventStore;
             private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
@@ -32,7 +32,7 @@ namespace FinanceExample.Application.Features.BankAccounts
                 }
 
                 // Get current version for optimistic concurrency
-                var currentVersion = await _eventStore.GetAggregateVersionAsync<BankAccountId, Guid>(
+                var currentVersion = await _eventStore.GetAggregateVersionAsync<BankAccountId>(
                     bankAccountId, cancellationToken);
 
                 // Perform the close operation

@@ -5,11 +5,9 @@
     /// Provides identity-based equality semantics and supports various ID types (Guid, string, Ulid, etc.).
     /// Entities are equal if they have the same ID, regardless of other property values.
     /// </summary>
-    /// <typeparam name="TId">The type of the entity's identifier, implementing IEntityId.</typeparam>
-    /// <typeparam name="TValue">The underlying type of the identifier value.</typeparam>
-    public abstract class Entity<TId, TValue> : IEntity<TId, TValue>, IEquatable<Entity<TId, TValue>>
-        where TId : IEntityId<TId, TValue>
-        where TValue : notnull, IEquatable<TValue>
+    /// <typeparam name="TId">The type of the entity's identifier.</typeparam>
+    public abstract class Entity<TId> : IEntity<TId>, IEquatable<Entity<TId>>
+        where TId : notnull
     {
         /// <summary>
         /// Gets the unique identifier for this entity.
@@ -31,12 +29,6 @@
         protected Entity(TId id) => Id = id ?? throw new ArgumentNullException(nameof(id));
 
         /// <summary>
-        /// Convenience method for derived types to create a new identifier using the static abstract New() method.
-        /// </summary>
-        /// <returns>A new identifier instance.</returns>
-        protected static TId NewId() => TId.New();
-
-        /// <summary>
         /// Determines whether the specified object is equal to the current entity.
         /// Entities are equal if they have the same ID.
         /// </summary>
@@ -44,7 +36,7 @@
         /// <returns>true if the specified object is equal to the current entity; otherwise, false.</returns>
         public override bool Equals(object? obj) =>
             ReferenceEquals(this, obj) ||
-            (obj is Entity<TId, TValue> other && EqualityComparer<TId>.Default.Equals(Id, other.Id));
+            (obj is Entity<TId> other && EqualityComparer<TId>.Default.Equals(Id, other.Id));
 
         /// <summary>
         /// Determines whether the specified entity is equal to the current entity.
@@ -52,7 +44,7 @@
         /// </summary>
         /// <param name="other">The entity to compare with the current entity.</param>
         /// <returns>true if the specified entity is equal to the current entity; otherwise, false.</returns>
-        public bool Equals(Entity<TId, TValue>? other) =>
+        public bool Equals(Entity<TId>? other) =>
              other is not null &&
              (ReferenceEquals(this, other) || EqualityComparer<TId>.Default.Equals(Id, other.Id));
 
@@ -69,7 +61,7 @@
         /// <param name="a">The first entity to compare.</param>
         /// <param name="b">The second entity to compare.</param>
         /// <returns>true if the entities are equal; otherwise, false.</returns>
-        public static bool operator ==(Entity<TId, TValue>? a, Entity<TId, TValue>? b) =>
+        public static bool operator ==(Entity<TId>? a, Entity<TId>? b) =>
             a is null ? b is null : a.Equals(b);
 
         /// <summary>
@@ -78,6 +70,6 @@
         /// <param name="a">The first entity to compare.</param>
         /// <param name="b">The second entity to compare.</param>
         /// <returns>true if the entities are not equal; otherwise, false.</returns>
-        public static bool operator !=(Entity<TId, TValue>? a, Entity<TId, TValue>? b) => !(a == b);
+        public static bool operator !=(Entity<TId>? a, Entity<TId>? b) => !(a == b);
     }
 }

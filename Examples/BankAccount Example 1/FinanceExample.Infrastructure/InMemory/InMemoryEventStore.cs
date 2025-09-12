@@ -19,18 +19,17 @@ namespace FinanceExample.Infrastructure.InMemory
             _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         }
 
-        public Task AppendEventsAsync<TId, TValue>(
+        public Task AppendEventsAsync<TId>(
             TId aggregateId,
             IEnumerable<IDomainEvent> events,
             int expectedVersion,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
 
-            var streamKey = GetStreamKey<TId, TValue>(aggregateId);
+            var streamKey = GetStreamKey<TId>(aggregateId);
             var eventsList = events.ToList();
 
             if (!eventsList.Any())
@@ -38,7 +37,7 @@ namespace FinanceExample.Infrastructure.InMemory
 
             var stream = _eventStreams.GetOrAdd(streamKey, _ => new InMemoryEventStream
             {
-                AggregateId = aggregateId.Value.ToString()!,
+                AggregateId = aggregateId.ToString()!,
                 AggregateType = typeof(TId).Name,
                 Version = 0
             });
@@ -70,26 +69,24 @@ namespace FinanceExample.Infrastructure.InMemory
             return Task.CompletedTask;
         }
 
-        public Task<IEnumerable<IDomainEvent>> GetEventsAsync<TId, TValue>(
+        public Task<IEnumerable<IDomainEvent>> GetEventsAsync<TId>(
             TId aggregateId,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
-            return GetEventsAsync<TId, TValue>(aggregateId, 0, cancellationToken);
+            return GetEventsAsync<TId>(aggregateId, 0, cancellationToken);
         }
 
-        public Task<IEnumerable<IDomainEvent>> GetEventsAsync<TId, TValue>(
+        public Task<IEnumerable<IDomainEvent>> GetEventsAsync<TId>(
             TId aggregateId,
             int fromVersion,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
 
-            var streamKey = GetStreamKey<TId, TValue>(aggregateId);
+            var streamKey = GetStreamKey<TId>(aggregateId);
 
             if (!_eventStreams.TryGetValue(streamKey, out var stream))
             {
@@ -108,13 +105,12 @@ namespace FinanceExample.Infrastructure.InMemory
             }
         }
 
-        public Task<PagedResult<IDomainEvent>> GetEventsPagedAsync<TId, TValue>(
+        public Task<PagedResult<IDomainEvent>> GetEventsPagedAsync<TId>(
             TId aggregateId,
             int pageNumber,
             int pageSize,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
@@ -125,7 +121,7 @@ namespace FinanceExample.Infrastructure.InMemory
             if (pageSize < 1)
                 throw new ArgumentException("Page size must be greater than 0", nameof(pageSize));
 
-            var streamKey = GetStreamKey<TId, TValue>(aggregateId);
+            var streamKey = GetStreamKey<TId>(aggregateId);
 
             if (!_eventStreams.TryGetValue(streamKey, out var stream))
             {
@@ -160,16 +156,15 @@ namespace FinanceExample.Infrastructure.InMemory
             }
         }
 
-        public Task<int> GetAggregateVersionAsync<TId, TValue>(
+        public Task<int> GetAggregateVersionAsync<TId>(
             TId aggregateId,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
 
-            var streamKey = GetStreamKey<TId, TValue>(aggregateId);
+            var streamKey = GetStreamKey<TId>(aggregateId);
 
             if (!_eventStreams.TryGetValue(streamKey, out var stream))
             {
@@ -182,26 +177,24 @@ namespace FinanceExample.Infrastructure.InMemory
             }
         }
 
-        public Task<bool> AggregateExistsAsync<TId, TValue>(
+        public Task<bool> AggregateExistsAsync<TId>(
             TId aggregateId,
             CancellationToken cancellationToken = default)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+            where TId : notnull
         {
             if (aggregateId == null)
                 throw new ArgumentNullException(nameof(aggregateId));
 
-            var streamKey = GetStreamKey<TId, TValue>(aggregateId);
+            var streamKey = GetStreamKey<TId>(aggregateId);
             var exists = _eventStreams.ContainsKey(streamKey);
 
             return Task.FromResult(exists);
         }
 
-        private static string GetStreamKey<TId, TValue>(TId aggregateId)
-            where TId : IEntityId<TId, TValue>
-            where TValue : notnull, IEquatable<TValue>
+        private static string GetStreamKey<TId>(TId aggregateId)
+            where TId : notnull
         {
-            return $"{typeof(TId).Name}_{aggregateId.Value}";
+            return $"{typeof(TId).Name}_{aggregateId}";
         }
     }
 }

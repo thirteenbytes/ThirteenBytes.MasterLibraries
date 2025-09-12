@@ -7,9 +7,9 @@ namespace FinanceExample.Infrastructure.Services
 {
     internal sealed class CurrencyValidationService : ICurrencyValidationService
     {
-        private readonly IRepository<SupportedCurrency, SupportedCurrencyId, string> _currencyRepository;
+        private readonly IRepository<SupportedCurrency, SupportedCurrencyId> _currencyRepository;
 
-        public CurrencyValidationService(IRepository<SupportedCurrency, SupportedCurrencyId, string> currencyRepository)
+        public CurrencyValidationService(IRepository<SupportedCurrency, SupportedCurrencyId> currencyRepository)
         {
             _currencyRepository = currencyRepository;
         }
