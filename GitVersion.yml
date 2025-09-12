@@ -1,0 +1,20 @@
+mode: ContinuousDelivery
+next-version: 1.0.0
+assembly-versioning-scheme: MajorMinorPatch
+assembly-file-versioning-scheme: MajorMinorPatchTag
+tag-prefix: '[vV]'
+continuous-delivery-fallback-tag: 'ci'
+major-version-bump-message: '\+semver:\s?(breaking|major)'
+minor-version-bump-message: '\+semver:\s?(feature|minor)'
+patch-version-bump-message: '\+semver:\s?(fix|patch)'
+
+branches:
+  release:
+    increment: Inherit
+    prevent-increment-of-merged-branch-version: true
+  beta:
+    increment: Inherit
+    tag: 'beta'
+    
+ignore:
+  sha: []
