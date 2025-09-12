@@ -11,10 +11,13 @@ patch-version-bump-message: '\+semver:\s?(fix|patch)'
 branches:
   release:
     regex: ^release$
+    mode: ContinuousDelivery
     increment: Inherit
     prevent-increment-of-merged-branch-version: true
+    tag: ''
   beta:
     regex: ^beta$
+    mode: ContinuousDeployment
     increment: Inherit
     tag: 'beta'
     source-branches: ['master']
