@@ -13,8 +13,8 @@
     <Product>ThirteenBytes DDD Patterns Primitives</Product>
     <Description>A comprehensive library of Domain-Driven Design (DDD) primitives and patterns including aggregate roots, entities, value objects, domain events, and repository abstractions. Provides strongly-typed IDs, event sourcing support, and common DDD building blocks for .NET applications.</Description>
     <PackageTags>DDD;Domain-Driven-Design;Aggregate;Entity;ValueObject;DomainEvents;EventSourcing;Repository;CQRS</PackageTags>
-    <PackageProjectUrl>https://github.com/thirteenbytes/ddd-patterns-primitives</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/thirteenbytes/ddd-patterns-primitives</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/thirteenbytes/ThirteenBytes.MasterLibraries</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/thirteenbytes/ThirteenBytes.MasterLibraries</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
