@@ -3,7 +3,7 @@ using ThirteenBytes.DDDPatterns.Primitives.Abstractions;
 
 namespace FinanceExample.Domain.Accounts
 {
-    public sealed record AccountHolderId(Guid Value) : EntityId<Guid>(Value), IEntityId<AccountHolderId, Guid>
+    public sealed record AccountHolderId(Guid Value) : EntityId<Guid>(Value)
     {
         public static AccountHolderId New() => 
             new (Guid.NewGuid());    
