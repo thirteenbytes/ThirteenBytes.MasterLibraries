@@ -7,7 +7,6 @@
     
     <!-- NuGet Package Metadata -->
     <PackageId>ThirteenBytes.DDDPatterns.Primitives</PackageId>
-    <PackageVersion>1.0.0</PackageVersion>
     <Authors>ThirteenBytes</Authors>
     <Company>ThirteenBytes</Company>
     <Product>ThirteenBytes DDD Patterns Primitives</Product>
