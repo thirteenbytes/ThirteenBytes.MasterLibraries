@@ -9,20 +9,7 @@ namespace FinanceExample.Domain.Accounts
         public FullName Name { get; private set; } = null!;
         public EmailAddress EmailAddress { get; private set; } = null!;
         public HolderType HolderType { get; private set; }
-
-        // For EF Core
-        private AccountHolder() { }
-
-        private AccountHolder(
-            FullName name, 
-            EmailAddress emailAddress, 
-            HolderType holderType) : base(AccountHolderId.New())
-        {
-            Name = name;
-            EmailAddress = emailAddress;
-            HolderType = holderType;
-        }
-
+        
         public static Result<AccountHolder> Create(
             string firstName,
             string lastName,
@@ -68,6 +55,18 @@ namespace FinanceExample.Domain.Accounts
         public void ChangeHolderType(HolderType newType)
         {
             HolderType = newType;         
+        }
+
+        private AccountHolder() { }
+
+        private AccountHolder(
+            FullName name,
+            EmailAddress emailAddress,
+            HolderType holderType) : base(AccountHolderId.New())
+        {
+            Name = name;
+            EmailAddress = emailAddress;
+            HolderType = holderType;
         }
     }
 }

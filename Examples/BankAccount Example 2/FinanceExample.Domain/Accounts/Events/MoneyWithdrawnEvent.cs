@@ -5,5 +5,6 @@ namespace FinanceExample.Domain.Accounts.Events
 {
     public record MoneyWithdrawnEvent(
         BankAccountId BankAccountId,
-        Money Amount) : DomainEvent;
+        Money Amount,
+        Money NewBalance) : DomainEvent;
 }

@@ -14,7 +14,8 @@
         /// <summary>
         /// Gets a value indicating whether the operation failed.
         /// </summary>
-        public bool IsFailure => !IsSuccess;
+        public bool IsFailure =>
+            !IsSuccess;
 
         /// <summary>
         /// Gets the collection of errors that occurred during the operation.
@@ -37,21 +38,24 @@
         /// Creates a successful result with no errors.
         /// </summary>
         /// <returns>A successful Result instance.</returns>
-        public static Result Success() => new(true, Array.Empty<Error>());
+        public static Result Success() =>
+            new(true, Array.Empty<Error>());
 
         /// <summary>
         /// Creates a failed result with a single error.
         /// </summary>
         /// <param name="error">The error that occurred.</param>
         /// <returns>A failed Result instance containing the error.</returns>
-        public static Result Failure(Error error) => new(false, new[] { error });
+        public static Result Failure(Error error) =>
+            new(false, new[] { error });
 
         /// <summary>
         /// Creates a failed result with multiple errors.
         /// </summary>
         /// <param name="errors">The collection of errors that occurred.</param>
         /// <returns>A failed Result instance containing the errors.</returns>
-        public static Result Failure(IReadOnlyList<Error> errors) => new(false, errors);
+        public static Result Failure(IReadOnlyList<Error> errors) =>
+            new(false, errors);
 
         /// <summary>
         /// Combines multiple results into a single result. If any result is a failure,
@@ -73,19 +77,22 @@
         /// Implicitly converts an Error to a failed Result.
         /// </summary>
         /// <param name="error">The error to convert.</param>
-        public static implicit operator Result(Error error) => Failure(error);
+        public static implicit operator Result(Error error) =>
+            Failure(error);
 
         /// <summary>
         /// Implicitly converts an array of Errors to a failed Result.
         /// </summary>
         /// <param name="errors">The errors to convert.</param>
-        public static implicit operator Result(Error[] errors) => Failure(errors);
+        public static implicit operator Result(Error[] errors) =>
+            Failure(errors);
 
         /// <summary>
         /// Implicitly converts a list of Errors to a failed Result.
         /// </summary>
         /// <param name="errors">The errors to convert.</param>
-        public static implicit operator Result(List<Error> errors) => Failure(errors);
+        public static implicit operator Result(List<Error> errors) =>
+            Failure(errors);
     }
 
     /// <summary>
@@ -124,45 +131,52 @@
         /// </summary>
         /// <param name="value">The value to return.</param>
         /// <returns>A successful Result instance containing the value.</returns>
-        public static Result<T> Success(T value) => new(value);
+        public static Result<T> Success(T value) =>
+            new(value);
 
         /// <summary>
         /// Creates a failed result with a single error.
         /// </summary>
         /// <param name="error">The error that occurred.</param>
         /// <returns>A failed Result instance containing the error.</returns>
-        public static new Result<T> Failure(Error error) => new(new[] { error });
+        public static new Result<T> Failure(Error error) =>
+            new(new[] { error });
 
         /// <summary>
         /// Creates a failed result with multiple errors.
         /// </summary>
         /// <param name="errors">The collection of errors that occurred.</param>
         /// <returns>A failed Result instance containing the errors.</returns>
-        public static new Result<T> Failure(IReadOnlyList<Error> errors) => new(errors);
+        public static new Result<T> Failure(IReadOnlyList<Error> errors) =>
+            new(errors);
 
         /// <summary>
         /// Implicitly converts a value to a successful Result.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator Result<T>(T value) => Success(value);
+        public static implicit operator Result<T>(T value) =>
+            Success(value);
 
         /// <summary>
         /// Implicitly converts an Error to a failed Result.
         /// </summary>
         /// <param name="error">The error to convert.</param>
-        public static implicit operator Result<T>(Error error) => Failure(error);
+        public static implicit operator Result<T>(Error error) =>
+            Failure(error);
 
         /// <summary>
         /// Implicitly converts a list of Errors to a failed Result.
         /// </summary>
         /// <param name="errors">The errors to convert.</param>
-        public static implicit operator Result<T>(List<Error> errors) => Failure(errors);
+        public static implicit operator Result<T>(List<Error> errors) =>
+            Failure(errors);
 
         /// <summary>
         /// Implicitly converts an array of Errors to a failed Result.
         /// </summary>
         /// <param name="errors">The errors to convert.</param>
-        public static implicit operator Result<T>(Error[] errors) => Failure(errors);
+        public static implicit operator Result<T>(Error[] errors) =>
+            Failure(errors);
 
         /// <summary>
         /// Gets the value or throws an InvalidOperationException if the result is a failure.

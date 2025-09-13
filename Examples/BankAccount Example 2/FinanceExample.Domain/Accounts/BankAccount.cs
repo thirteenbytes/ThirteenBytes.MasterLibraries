@@ -94,13 +94,32 @@ namespace FinanceExample.Domain.Accounts
                 return Result.Failure(moneyResult.Errors);
             }
 
+            var depositAmount = moneyResult.Value!;
+
             // Validate currency match
             if (Balance != null && Balance.Amount != 0 && Balance.Currency != currency)
             {
                 return Error.InvalidInput($"Currency mismatch: account is in {Balance.Currency}, deposit is in {currency}");
             }
 
-            return Apply(new MoneyDepositedEvent(Id, moneyResult.Value!));
+            // Calculate new balance
+            Money newBalance;
+            if (Balance.Amount == 0)
+            {
+                // First deposit or zero balance sets the currency
+                newBalance = depositAmount;
+            }
+            else
+            {
+                var addResult = Balance.Add(depositAmount);
+                if (addResult.IsFailure)
+                {
+                    return Result.Failure(addResult.Errors);
+                }
+                newBalance = addResult.Value!;
+            }
+
+            return Apply(new MoneyDepositedEvent(Id, depositAmount, newBalance));
         }
 
         public Result Withdraw(decimal amount, string currency)
@@ -122,15 +141,25 @@ namespace FinanceExample.Domain.Accounts
                 return Error.InvalidInput($"Currency mismatch: account is in {Balance.Currency}, withdrawal is in {currency}");
             }
 
-            // Check if sufficient funds
             var withdrawalAmount = moneyResult.Value!;
+            
+            // Check if sufficient funds and calculate new balance
             var canWithdrawResult = CanWithdraw(withdrawalAmount);
             if (canWithdrawResult.IsFailure)
             {
                 return canWithdrawResult;
             }
 
-            return Apply(new MoneyWithdrawnEvent(Id, withdrawalAmount));
+            // Calculate new balance
+            var subtractResult = Balance.Subtract(withdrawalAmount);
+            if (subtractResult.IsFailure)
+            {
+                return Result.Failure(subtractResult.Errors);
+            }
+
+            var newBalance = subtractResult.Value!;
+
+            return Apply(new MoneyWithdrawnEvent(Id, withdrawalAmount, newBalance));
         }
 
         private Result CanWithdraw(Money amount)
@@ -168,37 +197,15 @@ namespace FinanceExample.Domain.Accounts
         }
 
         private void OnMoneyDeposited(MoneyDepositedEvent @event)
-        {         
-            if (Balance.Amount == 0)
-            {
-                // First deposit or zero balance sets the currency
-                Balance = @event.Amount;
-            }
-            else
-            {
-                // Event handlers should not fail - this is state reconstruction
-                // We assume the events were already validated when originally applied
-                var addResult = Balance.Add(@event.Amount);
-                if (addResult.IsSuccess)
-                {
-                    Balance = addResult.Value!;
-                }
-                // If this fails during event replay, it indicates data corruption
-                // Consider logging this scenario or handling it based on your business rules
-            }
+        {   
+            // Simply set the balance from the event - no calculations needed
+            Balance = @event.NewBalance;
         }
 
         private void OnMoneyWithdrawn(MoneyWithdrawnEvent @event)
         {         
-            // Event handlers should not fail - this is state reconstruction
-            // We assume the events were already validated when originally applied
-            var subtractResult = Balance.Subtract(@event.Amount);
-            if (subtractResult.IsSuccess)
-            {
-                Balance = subtractResult.Value!;
-            }
-            // If this fails during event replay, it indicates data corruption
-            // Consider logging this scenario or handling it based on your business rules
+            // Simply set the balance from the event - no calculations needed
+            Balance = @event.NewBalance;
         }
     }
 }

@@ -29,38 +29,46 @@ public record UserId : EntityId<UserId>
 }
 ```
 
+```
+public sealed record TaskId(Guid Value) : EntityId<Guid>(Value)
+{
+    public static TaskId New() =>
+        new(Guid.NewGuid());
+
+    public static TaskId From(Guid value) =>
+        new(value);
+}
+```
+
 ### 2. Create a Value Object
 ```
-public class Email : ValueObject 
-{ 
-    public string Value { get; }
-    private Email(string value) => Value = value;
-
-    public static Result<Email> Create(string email)
+ public class TaskName : ValueObject<string, TaskName>
+ {
+    public static Result<TaskName> Create(string value)
     {
         return WithValidation(
-            () => Validate(email),
-            () => new Email(email));
+            value,
+            Validate,
+            value => new TaskName(value)
+        );
     }
 
-    private static List<Error> Validate(string email)
+    private static List<Error> Validate(string value)
     {
         var errors = new List<Error>();
-    
-        if (string.IsNullOrWhiteSpace(email))
-            errors.Add(Error.Validation("Email cannot be empty"));
-        
-        if (!email.Contains("@"))
-            errors.Add(Error.Validation("Email must contain @ symbol"));
-        
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            errors.Add(Error.Validation("Task name cannot be empty."));
+        }
+
+        if (value.Length > 100)
+        {
+            errors.Add(Error.Validation("Task name cannot exceed 100 characters."));
+        }
         return errors;
     }
-
-    protected override IEnumerable<object?> GetEqualityComponents()
-    {
-        yield return Value;
-    }
 }
+    
 ```
 
 ### 3. Create an Entity

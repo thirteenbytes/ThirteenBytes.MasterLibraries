@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using ThirteenBytes.DDDPatterns.Primitives.Abstractions;
 using ThirteenBytes.DDDPatterns.Primitives.Common;
@@ -27,13 +25,13 @@ namespace FinanceExample.Domain.Common
         private static List<Error> ValidateMoney(decimal amount, string currency)
         {
             var errors = new List<Error>();
-            
+
             // Amount validation
             if (amount < 0)
             {
                 errors.Add(Error.Validation("Amount cannot be negative"));
             }
-            
+
             // Currency validation - ISO 4217 currency codes are 3 alphabetic characters
             if (string.IsNullOrWhiteSpace(currency))
             {
@@ -43,7 +41,7 @@ namespace FinanceExample.Domain.Common
             {
                 errors.Add(Error.Validation("Currency must be a valid ISO 4217 code (3 alphabetic characters)"));
             }
-            
+
             return errors;
         }
 
