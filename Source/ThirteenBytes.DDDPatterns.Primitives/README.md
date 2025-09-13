@@ -257,27 +257,24 @@ public class UserAccountService
 public async Task<Result<UserAccount>> ProcessUserRegistration(string name, string email) 
 { 
     // Validate email 
-    var emailResult = Email.Create(email); 
-    if (emailResult.IsFailure) return emailResult.Errors; 
+    var emailResult = Email.Create(email); if (emailResult.IsFailure) return emailResult.Errors;
     
-    // Implicit conversion from errors to Result<T>
     // Check if user already exists
     var existingUser = await _repository.GetAsync(u => u.Email.Value == email);
-    if (existingUser != null)
-        return Error.Exists("User with this email already exists");
+    if (existingUser != null) 
+    {
+        return Error.Conflict("User with this email already exists");
+    }
 
     // Create and save user
-    var user = new UserAccount(UserId.New(), name, emailResult.Value);
-    await user.SaveNewAggregateEventsAsync(_eventStore);
-
-    return user; // Implicit conversion from value to Result<T>
+    var account = new UserAccount(UserId.New(), name, emailResult.Value!);
+    var saveResult = await account.SaveNewAggregateEventsAsync(_eventStore);
+    if (saveResult.IsFailure) 
+    {    
+        return saveResult.Errors;
     }
-    // Usage with pattern matching var result = await ProcessUserRegistration("John Doe", "john@example.com");
-    return result.Match( 
-        onSuccess: user => 
-            Ok(new { UserId = user.Id.Value, user.Name }), 
-        onFailure: errors => 
-            BadRequest(errors.Select(e => e.Description)));
+
+    return account;
 }
 ```
 
@@ -313,19 +310,19 @@ Check the `/Examples` folder in the source repository for complete working appli
 
 ### Core Interfaces
 
-- `IEntityId<TSelf, TValue>` - Contract for strongly-typed identifiers
-- `IEntity<TId, TValue>` - Base entity contract
+- `IEntity<TId>` - Base entity contract
 - `IAggregateRoot` - Aggregate root with event management
-- `IRepository<T, TId, TValue>` - Repository pattern interface
+- `IRepository<T, TId>` - Repository pattern interface
 - `IEventStore` - Event sourcing persistence
 - `IUnitOfWork` - Transaction management
 - `IDomainEventDispatcher` - Event publishing
 
 ### Base Classes
 
-- `Entity<TId, TValue>` - Entity with identity-based equality
-- `AuditEntity<TId, TValue>` - Entity with audit timestamps
-- `AggregateRoot<TId, TValue>` - Event-sourced aggregate root
+- `EntityId<TValue>` - Abstract base for strongly-typed identifiers
+- `Entity<TId>` - Entity with identity-based equality
+- `AuditEntity<TId>` - Entity with audit timestamps
+- `AggregateRoot<TId>` - Event-sourced aggregate root
 - `ValueObject` - Immutable value object with structural equality
 - `DomainEvent` - Base record for domain events
 
@@ -338,7 +335,7 @@ Check the `/Examples` folder in the source repository for complete working appli
 ## Requirements
 
 - .NET 8.0 or higher
-- C# 11+ (for static abstract interface members)
+- C# 12+ (for primary constructors and modern syntax)
 
 ## Contributing
 
@@ -351,6 +348,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Support
 
 For questions, issues, or feature requests, please visit the GitHub repository or contact the maintainers.
-
-
-
