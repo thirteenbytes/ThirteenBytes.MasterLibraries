@@ -19,7 +19,7 @@ A comprehensive library of Domain-Driven Design (DDD) primitives and patterns fo
 
 ### 1. Define a Strongly-Typed ID
 ```
-public record UserId : IEntityId<UserId, Guid> 
+public record UserId : EntityId<UserId> 
 { 
     public Guid Value { get; }
     private UserId(Guid value) => Value = value;
