@@ -10,25 +10,7 @@ namespace FinanceExample.Domain.Accounts
         public AccountHolderId AccountHolderId { get; private set; } = null!;
         public Money Balance { get; private set; } = null!;
         public AccountStatus Status { get; private set; }
-
-        // For EF Core
-        private BankAccount()
-        {
-            RegisterEventHandlers();
-        }
-
-        private BankAccount(BankAccountId id) : base(id)
-        {
-            RegisterEventHandlers();
-        }
-
-        private void RegisterEventHandlers()
-        {
-            On<BankAccountOpenedEvent>(OnBankAccountOpened);
-            On<BankAccountClosedEvent>(OnBankAccountClosed);
-            On<MoneyDepositedEvent>(OnMoneyDeposited);
-            On<MoneyWithdrawnEvent>(OnMoneyWithdrawn);
-        }
+        
 
         // Factory method
         public static Result<BankAccount> Open(
@@ -183,29 +165,43 @@ namespace FinanceExample.Domain.Accounts
             return Result.Success();
         }
 
-        // Event handlers - no validation, just state reconstruction
-        private void OnBankAccountOpened(BankAccountOpenedEvent @event)
+        // For EF Core
+        private BankAccount()
         {
-            AccountHolderId = @event.AccountHolderId;
-            Balance = @event.InitialDeposit;
-            Status = AccountStatus.Opened;
+            RegisterEventHandlers();
         }
 
-        private void OnBankAccountClosed(BankAccountClosedEvent @event)
+        private BankAccount(BankAccountId id) : base(id)
         {
-            Status = AccountStatus.Closed;
+            RegisterEventHandlers();
         }
 
-        private void OnMoneyDeposited(MoneyDepositedEvent @event)
-        {   
-            // Simply set the balance from the event - no calculations needed
-            Balance = @event.NewBalance;
-        }
+        private void RegisterEventHandlers()
+        {
+            // Register event handlers inline - no validation, just state reconstruction
+            On<BankAccountOpenedEvent>(e =>
+            {
+                AccountHolderId = e.AccountHolderId;
+                Balance = e.InitialDeposit;
+                Status = AccountStatus.Opened;
+            });
 
-        private void OnMoneyWithdrawn(MoneyWithdrawnEvent @event)
-        {         
-            // Simply set the balance from the event - no calculations needed
-            Balance = @event.NewBalance;
+            On<BankAccountClosedEvent>(e =>
+            {
+                Status = AccountStatus.Closed;
+            });
+
+            On<MoneyDepositedEvent>(e =>
+            {
+                // Simply set the balance from the event - no calculations needed
+                Balance = e.NewBalance;
+            });
+
+            On<MoneyWithdrawnEvent>(e =>
+            {
+                // Simply set the balance from the event - no calculations needed
+                Balance = e.NewBalance;
+            });
         }
     }
 }
