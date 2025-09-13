@@ -273,9 +273,13 @@ public async Task<Result<UserAccount>> ProcessUserRegistration(string name, stri
     return user; // Implicit conversion from value to Result<T>
     }
     // Usage with pattern matching var result = await ProcessUserRegistration("John Doe", "john@example.com");
-    return result.Match( onSuccess: user => Ok(new { UserId = user.Id.Value, user.Name }), onFailure: errors => BadRequest(errors.Select(e => e.Description)) );
+    return result.Match( 
+        onSuccess: user => 
+            Ok(new { UserId = user.Id.Value, user.Name }), 
+        onFailure: errors => 
+            BadRequest(errors.Select(e => e.Description)));
 }
-````````
+```
 
 ## Best Practices
 
