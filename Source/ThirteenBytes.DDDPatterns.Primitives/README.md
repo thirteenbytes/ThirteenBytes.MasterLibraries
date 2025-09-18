@@ -11,10 +11,10 @@ Domain-Driven Design is an approach to software development that:
 6. Pragmatism: DDD is most useful in complex, evolving domains, where deep collaboration between domain experts and developers is necessary to avoid chaos.
 
 ### Definitions
-Bounded Context: Boundary where a model has a single, consistent meaning.
-Aggregate Root:	The entry point to an Aggregate, enforces invariants, consistency rules.
-Entity:	Object defined by identity that persists through state changes.
-Value Object: Object defined only by attributes, immutable, no identity.
+- **Bounded Context**: Boundary where a model has a single, consistent meaning.
+- **Aggregate Root**:	The entry point to an Aggregate, enforces invariants, consistency rules.
+- **Entity**:	Object defined by identity that persists through state changes.
+- **Value Object**: Object defined only by attributes, immutable, no identity.
 
 ## Features
 
