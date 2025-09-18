@@ -2,6 +2,20 @@
 
 A comprehensive library of Domain-Driven Design (DDD) primitives and patterns for .NET applications. This package provides essential building blocks for implementing DDD principles, including aggregate roots, entities, value objects, domain events, and repository abstractions.
 
+Domain-Driven Design is an approach to software development that:
+1. Centers the domain model: Software should reflect the business’s real concepts, rules, and language.
+2. Uses Ubiquitous Language: A shared vocabulary across developers and business experts that’s embedded in code.
+3. Defines boundaries (Bounded Contexts): Each model has a clear boundary where its definitions are consistent and cohesive.
+4. Provides tactical building blocks: Entities (with identity), Value Objects (immutable), Aggregates (consistency boundaries), Repositories, Services, and Factories.
+5. Strategic design: Distinguishes between Core Domains (where innovation happens) and Supporting/Generic subdomains (where reuse or simpler solutions may suffice).
+6. Pragmatism: DDD is most useful in complex, evolving domains, where deep collaboration between domain experts and developers is necessary to avoid chaos.
+
+### Definitions
+Bounded Context: Boundary where a model has a single, consistent meaning.
+Aggregate Root:	The entry point to an Aggregate, enforces invariants, consistency rules.
+Entity:	Object defined by identity that persists through state changes.
+Value Object: Object defined only by attributes, immutable, no identity.
+
 ## Features
 
 - **Strongly-Typed Identifiers**: Type-safe entity IDs supporting various underlying types (Guid, string, Ulid, etc.)
