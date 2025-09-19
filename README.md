@@ -2,6 +2,41 @@
 
 A comprehensive showcase of Domain-Driven Design (DDD) patterns implementation in .NET 8, featuring a reusable primitives library and real-world banking examples demonstrating Clean Architecture, CQRS, and Event Sourcing.
 
+Domain-Driven Design is an approach to software development that:
+1. Centers the domain model: Software should reflect the business’s real concepts, rules, and language.
+2. Uses Ubiquitous Language: A shared vocabulary across developers and business experts that’s embedded in code.
+3. Defines boundaries (Bounded Contexts): Each model has a clear boundary where its definitions are consistent and cohesive.
+4. Provides tactical building blocks: Entities (with identity), Value Objects (immutable), Aggregates (consistency boundaries), Repositories, Services, and Factories.
+5. Strategic design: Distinguishes between Core Domains (where innovation happens) and Supporting/Generic subdomains (where reuse or simpler solutions may suffice).
+6. Pragmatism: DDD is most useful in complex, evolving domains, where deep collaboration between domain experts and developers is necessary to avoid chaos.
+
+### Basic Definitions
+- **Bounded Context**: Boundary where a model has a single, consistent meaning.
+- **Aggregate Root**:	The entry point to an Aggregate, enforces invariants, consistency rules.
+- **Entity**:	Object defined by identity that persists through state changes.
+- **Value Object**: Object defined only by attributes, immutable, no identity.
+
+### Detailed Definitions:
+#### Bounded Context
+- **Eric Evans (DDD)**: A Bounded Context is an explicit boundary within which a particular model applies. The meaning of terms, rules, and entities are consistent only inside that boundary. Outside, the same words may mean different things, so you must define translations or integrations.
+- **Vaughn Vernon (IDDD)**: A Bounded Context is the guardrail that keeps a model coherent. It’s both a linguistic and technical boundary, ensuring that terms have unambiguous meaning and implementations don’t drift into corruption. Teams can evolve independently within their bounded contexts.
+- **Martin Fowler**: A Bounded Context ensures that the model is not spread too thin. It provides clarity by stating “this is where this model applies, and outside we don’t make assumptions.” It’s crucial for large systems to avoid “semantic diffusion” (where words lose meaning).
+
+#### Aggregate Root (and Aggregates)
+- **Eric Evans**: An Aggregate is a cluster of associated objects treated as a unit for data changes. It enforces invariants across its members. One Entity is designated the Aggregate Root, and only the root is accessible from outside—other members are reached through it.
+- **Vaughn Vernon**: Aggregates are the transactional consistency boundaries. The Aggregate Root protects the integrity of the aggregate and enforces invariants. Clients only hold references to the root, never to its children directly.
+- **Martin Fowler**: Aggregates simplify transactional rules. Rather than every entity enforcing consistency globally, you encapsulate rules inside an Aggregate and enforce them there, making it clear what must be consistent together.
+
+#### Entities
+- **Eric Evans**: An Entity is an object distinguished by its identity, not just by its attributes. Two Entities with the same attributes but different identities are not the same. Identity runs through its entire lifecycle.
+- **Vaughn Vernon**: Entities model concepts that endure over time. Their identity is explicit (often via a unique ID), and their attributes and associations can change, but they remain the same entity.
+- **Martin Fowler**: In enterprise applications, Entities represent things like “Customer” or “Order” where who it is matters more than its current data. Identity is fundamental, not just the data snapshot.
+
+#### Value Objects
+- **Eric Evans**: A Value Object is an object that is defined only by its attributes, not by a distinct identity. They are immutable and replaceable. For example, two Money objects with the same amount and currency are indistinguishable.
+- **Vaughn Vernon**: Value Objects should be immutable and side-effect free. They are often used to model concepts like measurements, addresses, or date ranges. They can encapsulate logic (e.g., currency conversions) but should never have identity.
+- **Martin Fowler**: A Value Object represents descriptive aspects of the domain. They make code more expressive and reduce complexity by avoiding unnecessary identity. They’re safer because immutability eliminates unintended side effects.
+
 ## 🏗️ Repository Structure
 ├── Source/ │   
 └── ThirteenBytes.DDDPatterns.Primitives/     
