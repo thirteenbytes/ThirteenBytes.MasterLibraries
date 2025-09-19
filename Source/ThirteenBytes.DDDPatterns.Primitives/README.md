@@ -140,7 +140,7 @@ public record UserRegistered(UserId UserId, string Name, string Email) : DomainE
 public record EmailChanged(UserId UserId, string NewEmail) : DomainEvent;
 
 // Aggregate Root 
-public class UserAccount : AggregateRoot<UserId, Guid> 
+public class UserAccount : AggregateRoot<UserId> 
 { 
     public string Name { get; private set; } 
     public Email Email { get; private set; }
@@ -290,7 +290,7 @@ public class UserAccountService
         return await _eventStore.GetEventsPagedAsync<UserId, Guid>(id, pageNumber, pageSize);
     }
 }
-``
+```
 
 
 
