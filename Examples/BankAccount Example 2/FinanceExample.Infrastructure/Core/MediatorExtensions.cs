@@ -27,23 +27,23 @@ namespace FinanceExample.Infrastructure.Core
                     if (type.IsAbstract || type.IsInterface || type.IsGenericTypeDefinition)
                         continue;
 
-                    foreach (var i in type.GetInterfaces())
+                    foreach (var @interface in type.GetInterfaces())
                     {
-                        if (!i.IsGenericType) continue;
+                        if (!@interface.IsGenericType) continue;
 
-                        var gtd = i.GetGenericTypeDefinition();
+                        var genericTypeDefinition = @interface.GetGenericTypeDefinition();
 
                         // Handlers
-                        if (gtd == typeof(IRequestHandler<,>))
+                        if (genericTypeDefinition == typeof(IRequestHandler<,>))
                         {
-                            services.AddScoped(i, type);
+                            services.AddScoped(@interface, type);
                         }
 
                         // Pipeline behaviors
-                        if (gtd == typeof(IPipelineBehavior<,>))
+                        if (genericTypeDefinition == typeof(IPipelineBehavior<,>))
                         {
                             // Behaviors are resolved as IEnumerable<>, registration order matters for your pipeline.
-                            services.AddScoped(i, type);
+                            services.AddScoped(@interface, type);
                         }
                     }
                 }
