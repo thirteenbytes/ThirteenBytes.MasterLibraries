@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11010.61 d18.0
+VisualStudioVersion = 18.0.11010.61
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{CFE2E514-2E9C-41A2-AFF5-5C5173CA9F57}"
 EndProject
@@ -38,6 +38,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceExample.UnitTests", "Examples\BankAccount Example 2\FinanceExample.UnitTests\FinanceExample.UnitTests.csproj", "{194D3AE5-D4FD-A48B-618F-F324606529A7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceExample.WebApi", "Examples\BankAccount Example 2\FinanceExample.WebApi\FinanceExample.WebApi.csproj", "{98A3F3E2-371B-E417-30F6-5D33650C7CF4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example 3", "Example 3", "{CBF9BE66-6383-4747-8259-CE1D497D0608}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -107,6 +109,7 @@ Global
 		{07AB1FD5-2551-2F3E-2009-6AA897CAE027} = {21E27DFF-032D-4DBB-8E85-8E37A4507419}
 		{194D3AE5-D4FD-A48B-618F-F324606529A7} = {21E27DFF-032D-4DBB-8E85-8E37A4507419}
 		{98A3F3E2-371B-E417-30F6-5D33650C7CF4} = {21E27DFF-032D-4DBB-8E85-8E37A4507419}
+		{CBF9BE66-6383-4747-8259-CE1D497D0608} = {E789C4B4-4D0A-4DCF-8B1A-FF1F5A7D712E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {270F30B9-44AA-4ABF-803F-8243031818E1}

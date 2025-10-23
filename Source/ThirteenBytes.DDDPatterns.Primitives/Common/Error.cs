@@ -17,12 +17,30 @@
             new($"{domainModelName}.NotFound", $"The specified {domainModelName} was not found.");
 
         /// <summary>
+        /// Creates a "not found" error for a specific item within a domain model.
+        /// </summary>
+        /// <param name="domainModelName">The name of the domain model that was not found.</param>
+        /// <param name="itemNotFound">The identifier of the item that was not found.</param>
+        /// <returns>An Error instance with a standardized "not found" message.</returns>
+        public static Error NotFound(string domainModelName, string itemNotFound) =>
+            new($"{domainModelName}.NotFound", $"{domainModelName} with identifier '{itemNotFound}' was not found.");
+
+        /// <summary>
         /// Creates an "already exists" error for the specified domain model.
         /// </summary>
         /// <param name="domainModelName">The name of the domain model that already exists.</param>
         /// <returns>An Error instance with a standardized "already exists" message.</returns>
         public static Error Exists(string domainModelName) =>
             new($"{domainModelName}.Exists", $"The specified {domainModelName} already exists.");
+
+        /// <summary>
+        /// Creates an "already exists" error for the specified domain model.
+        /// </summary>
+        /// <param name="domainModelName">The name of the domain model that already exists.</param>
+        /// <param name="item">The identifier of the item that already exists.</param>
+        /// <returns>An Error instance with a standardized "already exists" message.</returns>
+        public static Error Exists(string domainModelName, string item) =>
+            new($"{domainModelName}.Exists", $"The specified {domainModelName} with identifier '{item}' already exists.");
 
         /// <summary>
         /// Creates an "invalid input" error with a custom description.
