@@ -12,6 +12,6 @@
         /// In production implementations, this typically returns DateTime.UtcNow.
         /// In test implementations, this can return fixed or controllable values.
         /// </summary>
-        DateTime UtcNow { get; }
+        DateTime UtcNow { get; }        
     }
 }
