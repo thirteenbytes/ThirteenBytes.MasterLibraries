@@ -42,6 +42,7 @@ Domain-Driven Design is an approach to software development that:
 - **Strongly-Typed Identifiers**: Type-safe entity IDs supporting various underlying types (Guid, string, Ulid, etc.)
 - **Entity Base Classes**: Abstract base classes for entities with identity-based equality
 - **Audit Support**: Built-in audit tracking with creation and modification timestamps
+- **Soft Delete Support**: IDeletable interface and DeletableAuditEntity base class for logical deletion
 - **Value Objects**: Base classes for immutable value objects with structural equality
 - **Aggregate Roots**: Event-sourcing capable aggregate roots with domain event management
 - **Domain Events**: Interfaces and base classes for domain event implementation
@@ -132,7 +133,52 @@ public class User : Entity<UserId>
 }
 ```
 
-### 4. Create an Aggregate Root with Domain Events
+### 4. Create a Soft Deletable Entity
+
+```csharp
+// Entity that supports soft delete
+public class Photo : DeletableAuditEntity<PhotoId>
+{
+    public string Url { get; private set; }
+    public string BlobReference { get; private set; }
+    
+    private Photo() { } // EF Core
+    
+    private Photo(PhotoId id, string url, string blobRef) : base(id)
+    {
+        Url = url;
+        BlobReference = blobRef;
+    }
+    
+    public static Photo Create(PhotoId id, string url, string blobRef)
+        => new(id, url, blobRef);
+}
+
+// Usage - Soft Delete
+photo.MarkAsDeleted(DateTime.UtcNow);
+await dbContext.SaveChangesAsync();
+
+// Usage - Restore (undo/compensation)
+photo.Restore();
+await dbContext.SaveChangesAsync();
+
+// EF Core Configuration
+builder.HasQueryFilter(e => e.DeletedAtUtc == null); // Auto-exclude deleted
+builder.HasIndex(e => e.DeletedAtUtc); // Optimize cleanup queries
+
+// Query Extensions
+var activePhotos = await dbContext.Photos
+    .ExcludeDeleted() // Explicitly exclude soft deleted
+    .ToListAsync();
+
+var deletedPhotos = await dbContext.Photos
+    .IgnoreQueryFilters()
+    .OnlyDeleted() // Only soft deleted entities
+    .Where(p => p.DeletedAtUtc <= cutoffDate)
+    .ToListAsync();
+```
+
+### 5. Create an Aggregate Root with Domain Events
 ```
 // Domain Events 
 
@@ -179,7 +225,7 @@ public class UserAccount : AggregateRoot<UserId>
 
 ```
 
-### 5. Use the Repository Pattern
+### 6. Use the Repository Pattern
 ```
 public class UserService 
 { 
@@ -229,7 +275,7 @@ public class UserService
 }
 ```
 
-### 6. Event Sourcing with Event Store
+### 7. Event Sourcing with Event Store
 
 ```
 public class UserAccountService 
@@ -294,7 +340,7 @@ public class UserAccountService
 
 
 
-### 7. Result Pattern for Error Handling
+### 8. Result Pattern for Error Handling
 
 ```
 public async Task<Result<UserAccount>> ProcessUserRegistration(string name, string email) 
@@ -354,6 +400,8 @@ Check the `/Examples` folder in the source repository for complete working appli
 ### Core Interfaces
 
 - `IEntity<TId>` - Base entity contract
+- `IAuditEntity` - Audit tracking contract  
+- `IDeletable` - Soft delete contract
 - `IAggregateRoot` - Aggregate root with event management
 - `IRepository<T, TId>` - Repository pattern interface
 - `IEventStore` - Event sourcing persistence
@@ -365,8 +413,9 @@ Check the `/Examples` folder in the source repository for complete working appli
 - `EntityId<TValue>` - Abstract base for strongly-typed identifiers
 - `Entity<TId>` - Entity with identity-based equality
 - `AuditEntity<TId>` - Entity with audit timestamps
+- `DeletableAuditEntity<TId>` - Entity with audit timestamps and soft delete support
 - `AggregateRoot<TId>` - Event-sourced aggregate root
-- `ValueObject` - Immutable value object with structural equality
+- `ValueObject` / `ValueObject<TValue, TSelf>` - Immutable value objects with structural equality
 - `DomainEvent` - Base record for domain events
 
 ### Utility Classes
@@ -377,8 +426,8 @@ Check the `/Examples` folder in the source repository for complete working appli
 
 ## Requirements
 
-- .NET 8.0 or higher
-- C# 12+ (for primary constructors and modern syntax)
+- .NET 10.0 or higher
+- C# 14+ (for primary constructors and modern syntax)
 
 ## Contributing
 
