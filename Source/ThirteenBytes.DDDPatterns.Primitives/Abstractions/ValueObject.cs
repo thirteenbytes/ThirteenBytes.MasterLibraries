@@ -3,11 +3,18 @@
 namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions
 {
     /// <summary>
-    /// Base class for value objects that wrap a single value with validation.
+    /// Base class for value objects that wrap a <b>single</b> primitive value with validation.
     /// Provides a strongly-typed wrapper around primitive values with explicit conversion operators.
     /// Implements value-based equality semantics automatically.
     /// </summary>
-    /// <typeparam name="TValue">The type of the underlying value.</typeparam>
+    /// <remarks>
+    /// Use this base class when the value object represents exactly one underlying primitive (e.g. a string ID,
+    /// a monetary amount, or an email address). Equality is derived solely from <typeparamref name="TValue"/>.
+    /// A <c>From</c> helper is provided for trusted-source reconstitution (e.g. EF Core
+    /// <c>IEntityTypeConfiguration</c>) that bypasses domain validation.
+    /// For value objects composed of <b>multiple</b> components, use <see cref="ValueObject"/> instead.
+    /// </remarks>
+    /// <typeparam name="TValue">The type of the underlying primitive value.</typeparam>
     /// <typeparam name="TSelf">The concrete value object type (self-referencing generic pattern).</typeparam>
     public abstract class ValueObject<TValue, TSelf> : IEquatable<ValueObject<TValue, TSelf>>
         where TSelf : ValueObject<TValue, TSelf>
@@ -112,13 +119,37 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions
             var errors = validate(input);
             return errors.Any() ? errors : creator(input);
         }
+
+        /// <summary>
+        /// Creates a value object instance directly from a trusted value, bypassing validation.
+        /// Intended for infrastructure concerns such as EF Core <c>IEntityTypeConfiguration</c>
+        /// where values are read from a trusted source (e.g., the database) and are already known to be valid.
+        /// </summary>
+        /// <param name="value">The trusted value to wrap.</param>
+        /// <param name="creator">Function that creates the value object instance from the value.</param>
+        /// <returns>A new instance of <typeparamref name="TSelf"/> wrapping the provided value.</returns>
+        protected static TSelf From(TValue value, Func<TValue, TSelf> creator) =>
+            creator(value);
     }
 
     /// <summary>
-    /// Base class for value objects in Domain-Driven Design.
-    /// Value objects are equality-comparable by their properties rather than identity.
-    /// They are immutable and represent domain concepts that are defined by their attributes.
+    /// Base class for value objects in Domain-Driven Design that are composed of
+    /// <b>multiple</b> components.
+    /// Value objects are equality-comparable by their components rather than identity.
+    /// They are immutable and represent domain concepts defined by their collective attributes.
     /// </summary>
+    /// <remarks>
+    /// Use this base class when the value object encapsulates more than one underlying value
+    /// (e.g. a <c>Money</c> type with <c>Amount</c> and <c>Currency</c>, or an <c>Address</c>).
+    /// Equality is driven by <see cref="GetEqualityComponents"/>, which every concrete type must implement.
+    /// <para>
+    /// A <c>From</c> helper is intentionally absent: because this class has no fixed <c>TValue</c>,
+    /// the concrete type owns full knowledge of how to reconstitute itself from a trusted source
+    /// (e.g. EF Core <c>IEntityTypeConfiguration</c>). Each derived class should expose its own
+    /// static <c>From</c> factory if needed.
+    /// </para>
+    /// For value objects that wrap a <b>single</b> primitive, use <see cref="ValueObject{TValue, TSelf}"/> instead.
+    /// </remarks>
     public abstract class ValueObject : IEquatable<ValueObject>
     {
         /// <summary>
