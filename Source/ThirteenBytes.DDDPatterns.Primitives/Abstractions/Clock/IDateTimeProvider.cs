@@ -12,6 +12,14 @@
         /// In production implementations, this typically returns DateTime.UtcNow.
         /// In test implementations, this can return fixed or controllable values.
         /// </summary>
-        DateTime UtcNow { get; }        
+        DateTime UtcNow { get; }
+        
+        /// <summary>
+        /// Gets the current UTC instant as a <see cref="DateTimeOffset"/> with a zero offset.
+        /// Defaults to <see cref="UtcNow"/> projected onto UTC, so existing implementors
+        /// (and test doubles) need only supply <see cref="UtcNow"/>.
+        /// </summary>
+        DateTimeOffset UtcNowOffset { get; } 
+
     }
 }

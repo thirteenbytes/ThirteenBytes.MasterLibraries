@@ -6,5 +6,9 @@ namespace FinanceExample.Infrastructure.Clock
     {
         public DateTime UtcNow =>
             DateTime.UtcNow;
+
+        public DateTimeOffset UtcNowOffset =>
+            new(DateTime.UtcNow, TimeSpan.Zero);
+
     }
 }

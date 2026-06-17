@@ -10,8 +10,9 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions
     /// <remarks>
     /// Use this base class when the value object represents exactly one underlying primitive (e.g. a string ID,
     /// a monetary amount, or an email address). Equality is derived solely from <typeparamref name="TValue"/>.
-    /// A <c>From</c> helper is provided for trusted-source reconstitution (e.g. EF Core
-    /// <c>IEntityTypeConfiguration</c>) that bypasses domain validation.
+    /// For trusted-source reconstitution (e.g. EF Core <c>IEntityTypeConfiguration</c>) expose a static
+    /// <c>From</c> factory on the concrete type that calls the private constructor directly:
+    /// <code>public static MyId From(string value) => new(value);</code>
     /// For value objects composed of <b>multiple</b> components, use <see cref="ValueObject"/> instead.
     /// </remarks>
     /// <typeparam name="TValue">The type of the underlying primitive value.</typeparam>
@@ -120,17 +121,7 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions
             return errors.Any() ? errors : creator(input);
         }
 
-        /// <summary>
-        /// Creates a value object instance directly from a trusted value, bypassing validation.
-        /// Intended for infrastructure concerns such as EF Core <c>IEntityTypeConfiguration</c>
-        /// where values are read from a trusted source (e.g., the database) and are already known to be valid.
-        /// </summary>
-        /// <param name="value">The trusted value to wrap.</param>
-        /// <param name="creator">Function that creates the value object instance from the value.</param>
-        /// <returns>A new instance of <typeparamref name="TSelf"/> wrapping the provided value.</returns>
-        protected static TSelf From(TValue value, Func<TValue, TSelf> creator) =>
-            creator(value);
-    }
+        }
 
     /// <summary>
     /// Base class for value objects in Domain-Driven Design that are composed of

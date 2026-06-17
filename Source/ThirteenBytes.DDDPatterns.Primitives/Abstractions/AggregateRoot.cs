@@ -4,64 +4,106 @@ using ThirteenBytes.DDDPatterns.Primitives.Common;
 namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions
 {
     /// <summary>
-    /// Aggregate Root base implementation with strongly-typed ID and auditing capabilities.
-    /// Provides event sourcing support with automatic event management, version tracking,
-    /// and in-memory event handler registration for domain events.
+    /// Base implementation for Aggregate Roots in Domain-Driven Design.
+    /// Supports a hybrid approach: state + domain events with built-in event sourcing readiness.
+    /// All state changes should preferably go through <see cref="Apply"/> so that events drive mutations.
     /// </summary>
     /// <typeparam name="TId">The type of the aggregate's identifier.</typeparam>
     public abstract class AggregateRoot<TId> : AuditEntity<TId>, IAggregateRoot
         where TId : notnull
     {
-        // Uncommitted domain events
-        private readonly List<IDomainEvent> _domainEvents = new();
-
-        // Route table for event handlers
-        private readonly Dictionary<Type, Action<IDomainEvent>> _handlers = new();
+        #region Public Members
 
         /// <summary>
-        /// Gets the current version of the aggregate.
-        /// Version increments with each applied or replayed event and is used for optimistic concurrency control.
+        /// Gets the current version of the aggregate for optimistic concurrency control.
+        /// Incremented with each applied or replayed event.
         /// </summary>
         public int Version { get; protected set; }
+
+        /// <summary>
+        /// Gets whether this aggregate has any uncommitted domain events.
+        /// </summary>
+        public bool HasUncommittedEvents => _domainEvents.Count > 0;
 
         /// <summary>
         /// Gets a read-only view of uncommitted domain events.
         /// These events will be persisted and published when the aggregate is saved.
         /// </summary>
-        public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+        public IReadOnlyCollection<IDomainEvent> DomainEvents
+            => GetUncommittedEvents();
 
         /// <summary>
-        /// Parameterless constructor for Entity Framework Core materialization and event sourcing reconstruction.
-        /// Should not be used directly in domain code. Use this constructor to register event handlers in derived classes.
+        /// Gets all uncommitted domain events that need to be persisted and published.
+        /// </summary>
+        public IReadOnlyCollection<IDomainEvent> GetUncommittedEvents()
+            => _domainEvents.AsReadOnly();
+
+        /// <summary>
+        /// Replays historical events to rebuild aggregate state (used in event sourcing).
+        /// Does not record events as uncommitted.
+        /// </summary>
+        public Result Replay(IEnumerable<IDomainEvent> history)
+        {
+            foreach (var e in history)
+            {
+                var result = When(e);
+                if (result.IsFailure)
+                    return result;
+
+                Version++;
+            }
+            return Result.Success();
+        }
+
+        /// <summary>
+        /// Marks all uncommitted events as committed (clears the list).
+        /// Should be called by UnitOfWork or EF SaveChangesInterceptor after successful persistence and publishing.
+        /// </summary>
+        public void MarkChangesAsCommitted() => _domainEvents.Clear();
+
+        /// <summary>
+        /// Clears all uncommitted domain events (legacy name for backward compatibility).
+        /// Prefer <see cref="MarkChangesAsCommitted"/> in new code.
+        /// </summary>
+        public void ClearDomainEvents() => MarkChangesAsCommitted();
+
+        #endregion
+
+        #region Protected Members
+
+        /// <summary>
+        /// Parameterless constructor for EF Core materialization and event sourcing reconstruction.
+        /// Derived classes should register event handlers here via <see cref="On{TEvent}"/>.
         /// </summary>
         protected AggregateRoot() { }
 
         /// <summary>
-        /// Domain constructor that creates an aggregate root with the specified identifier.
-        /// Typically called with a new identifier to create a new aggregate instance.
+        /// Domain constructor for creating a new aggregate with a specific ID.
         /// </summary>
-        /// <param name="id">The identifier for the aggregate root. Cannot be null.</param>
         protected AggregateRoot(TId id) : base(id) { }
 
         /// <summary>
-        /// Registers an in-memory event handler for a specific domain event type.
-        /// Handlers are used to mutate aggregate state when events are applied or replayed.
+        /// Registers an in-memory handler that mutates aggregate state when an event is applied or replayed.
         /// </summary>
-        /// <typeparam name="TEvent">The type of domain event to handle.</typeparam>
-        /// <param name="handler">The handler function that processes the event and mutates state.</param>
         protected void On<TEvent>(Action<TEvent> handler) where TEvent : IDomainEvent =>
             _handlers[typeof(TEvent)] = e => handler((TEvent)e);
 
         /// <summary>
-        /// Applies a domain event to the aggregate: routes to registered handler, records as uncommitted, and increments version.
-        /// This is the primary method for making state changes in event-sourced aggregates.
+        /// Applies a domain event: mutates state via registered handler, records the event as uncommitted,
+        /// and increments version. This is the preferred way to make state changes.
         /// </summary>
-        /// <param name="event">The domain event to apply to the aggregate.</param>
-        /// <returns>A Result indicating success or failure of the event application.</returns>
         protected Result Apply(IDomainEvent @event)
         {
+            if (@event == null)
+            {
+                return Result.Failure(Error.InternalError("Domain event cannot be null."));
+            }
+
             var result = When(@event);
-            if (result.IsFailure) return result;
+            if (result.IsFailure)
+            {
+                return result;
+            }
 
             _domainEvents.Add(@event);
             Version++;
@@ -69,31 +111,23 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions
         }
 
         /// <summary>
-        /// Replays a sequence of historical events to rebuild aggregate state.
-        /// Mutates state via registered handlers without recording events as uncommitted.
-        /// Used for event sourcing reconstruction from persisted event streams.
+        /// Raises a domain event without triggering state mutation via handler.
+        /// Use this when you mutate state directly and only want to record the fact.
+        /// Prefer <see cref="Apply"/> when possible for full event-driven consistency.
         /// </summary>
-        /// <param name="history">The sequence of historical events to replay.</param>
-        /// <returns>A Result indicating success or failure of the replay operation.</returns>
-        public Result Replay(IEnumerable<IDomainEvent> history)
+        protected void RaiseDomainEvent(IDomainEvent @event)
         {
-            foreach (var e in history)
-            {
-                var result = When(e);
-                if (result.IsFailure) return result;
+            if (@event == null)
+                throw new ArgumentNullException(nameof(@event));
 
-                Version++;
-            }
-            // No Touch() here—replay should mirror historical timestamps; let caller set audit as needed.
-            return Result.Success();
+            _domainEvents.Add(@event);
+            Version++;
         }
 
         /// <summary>
-        /// Routes a domain event to its registered handler for state mutation.
-        /// Returns failure if no handler is registered for the event type.
+        /// Routes the event to its registered handler for state mutation.
+        /// In production, unknown events are ignored (useful during replay of historical events).
         /// </summary>
-        /// <param name="event">The domain event to route to a handler.</param>
-        /// <returns>A Result indicating success or failure of the event handling.</returns>
         protected Result When(IDomainEvent @event)
         {
             if (_handlers.TryGetValue(@event.GetType(), out var handler))
@@ -102,21 +136,25 @@ namespace ThirteenBytes.DDDPatterns.Primitives.Abstractions
                 return Result.Success();
             }
 
+#if DEBUG
             return Result.Failure(Error.InternalError(
-                $"No handler registered for '{@event.GetType().Name}'."));
+                $"No handler registered for domain event '{@event.GetType().Name}'."));
+#else
+            // In production, silently ignore unknown events during replay
+            return Result.Success();
+#endif
         }
 
-        /// <summary>
-        /// Clears all uncommitted domain events from the aggregate.
-        /// Typically called after events have been successfully persisted and published.
-        /// </summary>
-        public void ClearDomainEvents() => _domainEvents.Clear();
+        #endregion
 
-        /// <summary>
-        /// Gets all uncommitted domain events that need to be persisted and published.
-        /// These events represent changes that have occurred since the last save operation.
-        /// </summary>
-        /// <returns>An enumerable of uncommitted domain events.</returns>
-        public IEnumerable<IDomainEvent> GetUncommittedEvents() => _domainEvents.AsReadOnly();
+        #region Private Members
+
+        // Uncommitted domain events
+        private readonly List<IDomainEvent> _domainEvents = new();
+
+        // Route table for event handlers (state mutation)
+        private readonly Dictionary<Type, Action<IDomainEvent>> _handlers = new();
+
+        #endregion
     }
 }
